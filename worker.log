@@ -1,0 +1,256 @@
+CRITICAL:DealifySearchWorker:Can't Run - Not Connected to Database
+INFO:root:Successfully Connected to Database!
+INFO:DealifySearchWorker:Successfully Connected to Database
+INFO:DealifySearchWorker.dealify_utils:Starting Search Task...
+Task ID: 1
+INFO:root:Started Craigslit Query with ID: 914
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 914
+INFO:root:Finished Craigslist Query with ID: 914 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 917
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 917
+INFO:root:Finished Craigslist Query with ID: 917 - Sleeping for 17s befor next Query
+INFO:root:Started Craigslit Query with ID: 916
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 916
+INFO:root:Finished Craigslist Query with ID: 916 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 915
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 915
+INFO:root:Finished Craigslist Query with ID: 915 - Sleeping for 16s befor next Query
+INFO:root:Started Craigslit Query with ID: 918
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 918
+INFO:root:Finished Craigslist Query with ID: 918 - Sleeping for 20s befor next Query
+INFO:root:Started Craigslit Query with ID: 919
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 919
+INFO:root:Finished Craigslist Query with ID: 919 - Sleeping for 8s befor next Query
+INFO:root:Started Craigslit Query with ID: 920
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 920
+INFO:root:Finished Craigslist Query with ID: 920 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 921
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 921
+INFO:root:Finished Craigslist Query with ID: 921 - Sleeping for 14s befor next Query
+INFO:root:Started Craigslit Query with ID: 924
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 924
+INFO:root:Finished Craigslist Query with ID: 924 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 923
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 923
+INFO:root:Finished Craigslist Query with ID: 923 - Sleeping for 9s befor next Query
+INFO:root:Started Craigslit Query with ID: 922
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 922
+INFO:root:Finished Craigslist Query with ID: 922 - Sleeping for 7s befor next Query
+INFO:root:Started Craigslit Query with ID: 925
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 925
+INFO:root:Finished Craigslist Query with ID: 925 - Sleeping for 11s befor next Query
+INFO:root:Started Craigslit Query with ID: 926
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 926
+INFO:root:Finished Craigslist Query with ID: 926 - Sleeping for 15s befor next Query
+INFO:root:Started Craigslit Query with ID: 927
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 927
+INFO:root:Finished Craigslist Query with ID: 927 - Sleeping for 5s befor next Query
+INFO:root:Started Craigslit Query with ID: 928
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 928
+INFO:root:Finished Craigslist Query with ID: 928 - Sleeping for 13s befor next Query
+INFO:root:Started Craigslit Query with ID: 931
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 931
+INFO:root:Finished Craigslist Query with ID: 931 - Sleeping for 20s befor next Query
+INFO:root:Started Craigslit Query with ID: 929
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 929
+INFO:root:Finished Craigslist Query with ID: 929 - Sleeping for 15s befor next Query
+INFO:root:Started Craigslit Query with ID: 930
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 930
+INFO:root:Finished Craigslist Query with ID: 930 - Sleeping for 17s befor next Query
+INFO:root:Started Craigslit Query with ID: 932
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 932
+INFO:root:Finished Craigslist Query with ID: 932 - Sleeping for 11s befor next Query
+INFO:root:Started Craigslit Query with ID: 933
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 933
+INFO:root:Finished Craigslist Query with ID: 933 - Sleeping for 14s befor next Query
+INFO:root:Started Craigslit Query with ID: 934
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 934
+INFO:root:Finished Craigslist Query with ID: 934 - Sleeping for 11s befor next Query
+INFO:root:Started Craigslit Query with ID: 938
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 938
+INFO:root:Finished Craigslist Query with ID: 938 - Sleeping for 14s befor next Query
+INFO:root:Started Craigslit Query with ID: 937
+INFO:root:New Craigslist Item Created!
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 937
+INFO:root:Finished Craigslist Query with ID: 937 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 936
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 936
+INFO:root:Finished Craigslist Query with ID: 936 - Sleeping for 15s befor next Query
+INFO:root:Started Craigslit Query with ID: 935
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 935
+INFO:root:Finished Craigslist Query with ID: 935 - Sleeping for 19s befor next Query
+INFO:root:Started Craigslit Query with ID: 939
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 939
+INFO:root:Finished Craigslist Query with ID: 939 - Sleeping for 17s befor next Query
+INFO:root:Started Craigslit Query with ID: 940
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 940
+INFO:root:Finished Craigslist Query with ID: 940 - Sleeping for 16s befor next Query
+INFO:root:Started Craigslit Query with ID: 941
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 941
+INFO:root:Finished Craigslist Query with ID: 941 - Sleeping for 17s befor next Query
+INFO:root:Started Craigslit Query with ID: 945
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 945
+INFO:root:Finished Craigslist Query with ID: 945 - Sleeping for 9s befor next Query
+INFO:root:Started Craigslit Query with ID: 944
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 944
+INFO:root:Finished Craigslist Query with ID: 944 - Sleeping for 14s befor next Query
+INFO:root:Started Craigslit Query with ID: 942
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 942
+INFO:root:Finished Craigslist Query with ID: 942 - Sleeping for 10s befor next Query
+INFO:root:Started Craigslit Query with ID: 943
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 943
+INFO:root:Finished Craigslist Query with ID: 943 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 946
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 946
+INFO:root:Finished Craigslist Query with ID: 946 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 947
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 947
+INFO:root:Finished Craigslist Query with ID: 947 - Sleeping for 13s befor next Query
+INFO:root:Started Craigslit Query with ID: 948
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 948
+INFO:root:Finished Craigslist Query with ID: 948 - Sleeping for 16s befor next Query
+INFO:root:Started Craigslit Query with ID: 951
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 951
+INFO:root:Finished Craigslist Query with ID: 951 - Sleeping for 15s befor next Query
+INFO:root:Started Craigslit Query with ID: 950
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 950
+INFO:root:Finished Craigslist Query with ID: 950 - Sleeping for 8s befor next Query
+INFO:root:Started Craigslit Query with ID: 949
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 949
+INFO:root:Finished Craigslist Query with ID: 949 - Sleeping for 7s befor next Query
+INFO:root:Started Craigslit Query with ID: 952
+WARNING:python-craiglist:Request failed (('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))). Retrying ...
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 952
+INFO:root:Finished Craigslist Query with ID: 952 - Sleeping for 7s befor next Query
+INFO:root:Started Craigslit Query with ID: 953
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 953
+INFO:root:Finished Craigslist Query with ID: 953 - Sleeping for 15s befor next Query
+INFO:root:Started Craigslit Query with ID: 954
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 954
+INFO:root:Finished Craigslist Query with ID: 954 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 955
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 955
+INFO:root:Finished Craigslist Query with ID: 955 - Sleeping for 19s befor next Query
+INFO:root:Started Craigslit Query with ID: 958
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 958
+INFO:root:Finished Craigslist Query with ID: 958 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 956
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 956
+INFO:root:Finished Craigslist Query with ID: 956 - Sleeping for 15s befor next Query
+INFO:root:Started Craigslit Query with ID: 957
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 957
+INFO:root:Finished Craigslist Query with ID: 957 - Sleeping for 20s befor next Query
+INFO:root:Started Craigslit Query with ID: 959
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 959
+INFO:root:Finished Craigslist Query with ID: 959 - Sleeping for 14s befor next Query
+INFO:root:Started Craigslit Query with ID: 960
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 960
+INFO:root:Finished Craigslist Query with ID: 960 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 961
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 961
+INFO:root:Finished Craigslist Query with ID: 961 - Sleeping for 11s befor next Query
+INFO:root:Started Craigslit Query with ID: 962
+WARNING:python-craiglist:Request failed (('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))). Retrying ...
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 962
+INFO:root:Finished Craigslist Query with ID: 962 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 965
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 965
+INFO:root:Finished Craigslist Query with ID: 965 - Sleeping for 18s befor next Query
+INFO:root:Started Craigslit Query with ID: 964
+INFO:root:New Craigslist Item Created!
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 964
+INFO:root:Finished Craigslist Query with ID: 964 - Sleeping for 20s befor next Query
+INFO:root:Started Craigslit Query with ID: 963
+WARNING:python-craiglist:Request failed (('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))). Retrying ...
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 963
+INFO:root:Finished Craigslist Query with ID: 963 - Sleeping for 9s befor next Query
+INFO:root:Started Craigslit Query with ID: 966
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 966
+INFO:root:Finished Craigslist Query with ID: 966 - Sleeping for 7s befor next Query
+INFO:root:Started Craigslit Query with ID: 967
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 967
+INFO:root:Finished Craigslist Query with ID: 967 - Sleeping for 16s befor next Query
+INFO:root:Started Craigslit Query with ID: 968
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 968
+INFO:root:Finished Craigslist Query with ID: 968 - Sleeping for 16s befor next Query
+INFO:root:Started Craigslit Query with ID: 969
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 969
+INFO:root:Finished Craigslist Query with ID: 969 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 972
+WARNING:python-craiglist:Request failed (('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))). Retrying ...
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 972
+INFO:root:Finished Craigslist Query with ID: 972 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 971
+WARNING:python-craiglist:Request failed (('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))). Retrying ...
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 971
+INFO:root:Finished Craigslist Query with ID: 971 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 970
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 970
+INFO:root:Finished Craigslist Query with ID: 970 - Sleeping for 14s befor next Query
+INFO:root:Started Craigslit Query with ID: 973
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 973
+INFO:root:Finished Craigslist Query with ID: 973 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 974
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 974
+INFO:root:Finished Craigslist Query with ID: 974 - Sleeping for 8s befor next Query
+INFO:root:Started Craigslit Query with ID: 975
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 975
+INFO:root:Finished Craigslist Query with ID: 975 - Sleeping for 15s befor next Query
+INFO:root:Started Craigslit Query with ID: 979
+INFO:root:New Craigslist Item Created!
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 979
+INFO:root:Finished Craigslist Query with ID: 979 - Sleeping for 8s befor next Query
+INFO:root:Started Craigslit Query with ID: 978
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 978
+INFO:root:Finished Craigslist Query with ID: 978 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 977
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 977
+INFO:root:Finished Craigslist Query with ID: 977 - Sleeping for 8s befor next Query
+INFO:root:Started Craigslit Query with ID: 976
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 976
+INFO:root:Finished Craigslist Query with ID: 976 - Sleeping for 13s befor next Query
+INFO:root:Started Craigslit Query with ID: 980
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 980
+INFO:root:Finished Craigslist Query with ID: 980 - Sleeping for 12s befor next Query
+INFO:root:Started Craigslit Query with ID: 981
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 981
+INFO:root:Finished Craigslist Query with ID: 981 - Sleeping for 19s befor next Query
+INFO:root:Started Craigslit Query with ID: 982
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 982
+INFO:root:Finished Craigslist Query with ID: 982 - Sleeping for 19s befor next Query
+INFO:root:Started Craigslit Query with ID: 985
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 985
+INFO:root:Finished Craigslist Query with ID: 985 - Sleeping for 8s befor next Query
+INFO:root:Started Craigslit Query with ID: 984
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 984
+INFO:root:Finished Craigslist Query with ID: 984 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 983
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 983
+INFO:root:Finished Craigslist Query with ID: 983 - Sleeping for 7s befor next Query
+INFO:root:Started Craigslit Query with ID: 986
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 986
+INFO:root:Finished Craigslist Query with ID: 986 - Sleeping for 13s befor next Query
+INFO:root:Started Craigslit Query with ID: 988
+INFO:root:New Craigslist Item Created!
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 988
+INFO:root:Finished Craigslist Query with ID: 988 - Sleeping for 13s befor next Query
+INFO:root:Started Craigslit Query with ID: 992
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 992
+INFO:root:Finished Craigslist Query with ID: 992 - Sleeping for 6s befor next Query
+INFO:root:Started Craigslit Query with ID: 990
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 990
+INFO:root:Finished Craigslist Query with ID: 990 - Sleeping for 19s befor next Query
+INFO:root:Started Craigslit Query with ID: 994
+INFO:root:Finished Query Craigslist Items - Found 0 Items for Query 994
+INFO:root:Finished Craigslist Query with ID: 994 - Sleeping for 9s befor next Query
+Finished Craigslist Query with ID: 994 - Sleeping for 9s befor next Query
