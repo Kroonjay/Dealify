@@ -63,6 +63,7 @@ class DealifyWorker:
                 self.logger.info(
                     "sucessfully executed task - Sleeping for 60s")
                 await asyncio.sleep(60)
+                self.current_task = None
 
     def work(self):
         self.loop.run_until_complete(self._run())

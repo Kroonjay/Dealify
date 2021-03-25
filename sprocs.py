@@ -10,7 +10,10 @@ read_craigslist_subdomain_by_site_id_sproc = "ReadCraigslistSubdomainBySiteId"
 read_craigslist_site_ids_by_country_sproc = "ReadCraigslistSiteIdsByCountry"
 # Values: @search_id_param
 read_dealify_search_by_id_sproc = "ReadDealifySearchById"
-start_next_overdue_craigslist_query_sproc = "StartNextOverdueCraigslistQuery"
+
+read_next_overdue_craigslist_query_id_sproc = "ReadNextOverdueCraigslistQueryId"
+# Values: @query_id_param
+start_overdue_craigslist_query_sproc = "StartOverdueCraigslistQuery"
 # Values: @query_id_param
 finish_craigslist_query_sproc = "FinishCraigslistQuery"
 # Values: @search_id_param
@@ -23,3 +26,5 @@ create_dealify_search_task_sproc = "CreateDealifySearchTask"
 read_dealify_search_task_by_id_sproc = "ReadDealifySearchTaskById"
 
 start_next_dealify_search_task_sproc = "StartNextDealifySearchTask"
+
+set_overdue_craigslist_queries_sproc = "SetOverdueCraigslistQueries"

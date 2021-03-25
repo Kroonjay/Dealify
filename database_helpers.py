@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from models import model_to_json_string, model_to_values, CraigslistQuery, DealifySearchTask, DealifySearchStatus
 from config import DEALIFY_DB_CREDS
-from sprocs import start_next_dealify_search_task_sproc, read_dealify_search_task_by_id_sproc, read_dealify_search_task_by_id_sproc, create_dealify_search_sproc, create_craigslist_query_sproc, create_craigslist_item_sproc, create_craigslist_site_sproc, read_craigslist_subdomain_by_site_id_sproc, read_dealify_search_by_id_sproc, read_craigslist_site_ids_by_country_sproc, start_next_overdue_craigslist_query_sproc, finish_craigslist_query_sproc, user_disable_dealify_search_sproc, read_craigslist_items_by_search_id_sproc, create_dealify_search_task_sproc
+from sprocs import set_overdue_craigslist_queries_sproc, read_next_overdue_craigslist_query_id_sproc, start_next_dealify_search_task_sproc, read_dealify_search_task_by_id_sproc, read_dealify_search_task_by_id_sproc, create_dealify_search_sproc, create_craigslist_query_sproc, create_craigslist_item_sproc, create_craigslist_site_sproc, read_craigslist_subdomain_by_site_id_sproc, read_dealify_search_by_id_sproc, read_craigslist_site_ids_by_country_sproc, start_overdue_craigslist_query_sproc, finish_craigslist_query_sproc, user_disable_dealify_search_sproc, read_craigslist_items_by_search_id_sproc, create_dealify_search_task_sproc
 from prep_stmts import read_all_craigslist_site_ids_stmt
 
 
@@ -168,9 +168,26 @@ def read_dealify_search_by_search_id(search_id, conn):
 
 
 @asyncio.coroutine
-def start_next_overdue_craigslist_query(conn):
+def read_next_overdue_craigslist_query_id(conn):
     cur = yield from conn.cursor()
-    yield from cur.callproc(start_next_overdue_craigslist_query_sproc)
+    yield from cur.callproc(read_next_overdue_craigslist_query_id_sproc)
+    try:
+        (row, ) = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.info(
+            "Read Next Overdue Craigslist Query ID - Value Error - No Overdue Queries")
+        return None
+    query_id = row[0]
+    return query_id
+
+
+@asyncio.coroutine
+def start_overdue_craigslist_query(query_id, conn):
+    if not isinstance(query_id, int):
+        logging.error("Search ID must be an Integer")
+        return None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(start_overdue_craigslist_query_sproc, [query_id])
     try:
         (row, ) = yield from cur.fetchall()
     except ValueError as vale:
@@ -302,3 +319,19 @@ def start_next_dealify_search_task(conn):
         logging.error(
             f"Failed to Retrieve Dealify Search Task - Data: {ve.json()}")
         return None
+
+
+@asyncio.coroutine
+def set_overdue_craigslist_queries(conn):
+    cur = yield from conn.cursor()
+    yield from cur.callproc(set_overdue_craigslist_queries_sproc)
+    try:
+        (row, ) = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.error(
+            "Set Overdue Craigslist Queries - Value Error - Expected Overdue Query Count")
+        return None
+    overdue_query_count = row[0]
+    logging.info(
+        f"Set Overdue Craigslsit Queries Completed - {overdue_query_count} Total Overdue Queries")
+    return overdue_query_count

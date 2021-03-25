@@ -32,8 +32,10 @@ class LocationRestrictionTypes(Enum):
 
 class DealifySearchTaskTypes(Enum):
     Dormont = 0  # No Current Task
-    OverdueCraigslistQueries = 1  # work_overdue_craigslist_queries
+    SearchOverdueCraigslistQueries = 1  # work_overdue_craigslist_queries
     CraigslistSites = 2  # Refresh Craigslist Sites & Location Data
+    # Update query_status to 2 based on last_execution_at time
+    SetOverdueCraigslistQueries = 3
 
 
 class PriceRestrictionTypes(Enum):

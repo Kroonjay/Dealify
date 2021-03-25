@@ -6,9 +6,10 @@ from urllib.parse import urlparse
 from pydantic import ValidationError
 from craigslist import CraigslistForSale
 from craigslist_config import CL_SITES_URL, CL_SITE_IGNORED_SUBDOMAINS, CL_NOMINATIM_AGENT, CL_QUERY_SLEEP_INTERVAL_SECONDS_MIN, CL_QUERY_SLEEP_INTERVAL_SECONDS_MAX, CL_QUERY_MAX_RETRIES, CL_QUERY_MAX_QUERIES, CL_QUERY_RATE_LIMIT_SLEEP_INTERVAL_SECONDS
+from dealify_utils import log, log_error, log_debug
 from parsers import parse_price, parse_special
 from models import CraigslistItemIn, CraigslistQueryIn, CraigslistQuery, CraigslistQueryExecDetails, CraigslistSiteIn, LocationRestrictionTypes, RestrictionTypes
-from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, start_next_overdue_craigslist_query, finish_craigslist_query
+from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, read_next_overdue_craigslist_query_id, start_overdue_craigslist_query, finish_craigslist_query
 import json
 from geopy.geocoders import Nominatim
 import asyncio
@@ -224,9 +225,14 @@ async def work_overdue_craigslist_queries(conn, query_sleep_seconds_min=CL_QUERY
     queries = 0
     while retries < query_max_retries and queries < max_queries:
         cl_query = None
-        cl_query = await start_next_overdue_craigslist_query(conn)
-        if not cl_query:
+        cl_query_id = await read_next_overdue_craigslist_query_id(conn)
+        if not cl_query_id:
             logging.info("Work Overdue Craigslist Queries - No Queries")
+            break
+        cl_query = await start_overdue_craigslist_query(cl_query_id, conn)
+        if not cl_query:
+            logging.info(
+                f"Work Overdue Craigslist Queries - Unable to Retrieve CL Query for ID: {cl_query_id}")
             break
         logging.info(f"Started Craigslit Query with ID: {cl_query.query_id}")
         logging.debug(cl_query.json())
