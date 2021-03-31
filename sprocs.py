@@ -28,3 +28,15 @@ read_dealify_search_task_by_id_sproc = "ReadDealifySearchTaskById"
 start_next_dealify_search_task_sproc = "StartNextDealifySearchTask"
 
 set_overdue_craigslist_queries_sproc = "SetOverdueCraigslistQueries"
+
+read_new_dealify_search_ids_sproc = "ReadNewDealifySearchIds"
+# Values: @search_id_param
+set_dormant_dealify_search_sproc = "SetDormantDealifySearch"
+# Values: @worker_name_param, @task_config_param
+create_dealify_worker_sproc = "CreateDealifyWorker"
+# Values: @worker_id_param
+read_dealify_worker_by_id_sproc = "ReadDealifyWorkerById"
+# Values: @worker_id_param, @worker_status_param
+update_dealify_worker_status_sproc = "UpdateDealifyWorkerStatus"
+
+read_dealify_task_ids_by_type_sproc = "ReadDealifyTaskIdsByType"

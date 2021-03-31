@@ -1,6 +1,6 @@
 DELIMITER //
-CREATE PROCEDURE ReadDealifySearchTaskById (
-    IN task_id_param INT
+CREATE PROCEDURE ReadDealifySearchById (
+    IN search_id_param INT
 ) BEGIN
-SELECT task_id, task_name, task_type, task_status, task_config, created_at, last_execution_at FROM DealifySearchTasks WHERE task_id = task_id_param LIMIT 1;
+SELECT search_id,search_status,search_name,sources,search_config,created_at FROM DealifySearches WHERE search_id = search_id_param LIMIT 1;
 END //

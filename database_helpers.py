@@ -7,9 +7,9 @@ import json
 from pymysql.err import IntegrityError
 from pydantic import ValidationError
 
-from models import model_to_json_string, model_to_values, CraigslistQuery, DealifySearchTask, DealifySearchStatus
-from config import DEALIFY_DB_CREDS
-from sprocs import set_overdue_craigslist_queries_sproc, read_next_overdue_craigslist_query_id_sproc, start_next_dealify_search_task_sproc, read_dealify_search_task_by_id_sproc, read_dealify_search_task_by_id_sproc, create_dealify_search_sproc, create_craigslist_query_sproc, create_craigslist_item_sproc, create_craigslist_site_sproc, read_craigslist_subdomain_by_site_id_sproc, read_dealify_search_by_id_sproc, read_craigslist_site_ids_by_country_sproc, start_overdue_craigslist_query_sproc, finish_craigslist_query_sproc, user_disable_dealify_search_sproc, read_craigslist_items_by_search_id_sproc, create_dealify_search_task_sproc
+from models import DealifyWorkerTaskConfig, DealifyWorker, model_to_json_string, model_to_values, CraigslistQuery, DealifySearchTask, DealifySearchStatus, LocationRestrictionConfig, PriceRestrictionConfig, PriceRestrictionTypes, CraigslistConfig, DealifySearch, SearchConfig
+from config import DEALIFY_DB_CREDS, SEARCH_CONFIG_CL_CONFIG_KEY_NAME, SEARCH_CONFIG_LOCATION_RESTRICTION_KEY_NAME, SEARCH_CONFIG_LOCATION_UNRESTRICTED_SEARCH_KEY, SEARCH_CONFIG_PRICE_RESTRICTION_KEY_NAME
+from sprocs import *
 from prep_stmts import read_all_craigslist_site_ids_stmt
 
 
@@ -335,3 +335,111 @@ def set_overdue_craigslist_queries(conn):
     logging.info(
         f"Set Overdue Craigslsit Queries Completed - {overdue_query_count} Total Overdue Queries")
     return overdue_query_count
+
+
+@asyncio.coroutine
+def read_new_dealify_search_ids(conn):
+    cur = yield from conn.cursor()
+    yield from cur.callproc(read_new_dealify_search_ids_sproc)
+    try:
+        (row, ) = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.error(
+            "Read New Dealify Search ID's - Value Error - No New Search ID's"
+        )
+        return None
+    new_search_ids = [(item) for item in row]
+    logging.info(f"{new_search_ids}")
+    return new_search_ids
+
+
+@asyncio.coroutine
+def set_dormant_dealify_search(search_id, conn):
+    if not isinstance(search_id, int):
+        logging.error(f"Search ID must be an Integer - Got: {type(search_id)}")
+        return None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(set_dormant_dealify_search_sproc, [search_id])
+    logging.info(
+        f"Set Dormant Dealify Search Finished - Search ID: {search_id}")
+    return
+
+
+@asyncio.coroutine
+def create_dealify_worker(worker_in, conn):
+    values = model_to_values(worker_in)
+    logging.debug(values)
+    cur = yield from conn.cursor()
+    yield from cur.callproc(create_dealify_worker_sproc, values)
+
+
+@asyncio.coroutine
+def update_dealify_worker_status(worker_id, new_status, conn):
+    if not isinstance(worker_id, int):
+        logging.error(f"Worker ID must be an Integer - Got: {type(search_id)}")
+        return None
+    if not isinstance(new_status, int):
+        logging.error(
+            f"Worker Status must be an Integer - Got: {type(search_id)}")
+        return None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(update_dealify_worker_status_sproc, [worker_id, new_status])
+
+
+@asyncio.coroutine
+def read_dealify_worker_by_id(worker_id, conn):
+    if not isinstance(worker_id, int):
+        logging.error(f"Worker ID must be an Integer - Got: {type(search_id)}")
+        return None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(read_dealify_worker_by_id_sproc, [worker_id])
+    try:
+        (row, ) = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.error(
+            f"Read Dealify Worker By ID - Value Error - No Worker Found for ID:{worker_id}"
+        )
+        return None
+
+    try:
+        worker = DealifyWorker(
+            worker_id=row[0],
+            worker_name=row[1],
+            worker_status=row[2],
+            current_task=row[3],
+            task_config=DealifyWorkerTaskConfig(**json.loads(row[4])),
+            created_at=row[5],
+            started_at=row[6]
+        )
+        logging.debug(
+            f"Read Dealify Worker By ID Successful - Values: {worker.json()}")
+        return worker
+    except ValidationError as ve:
+        logging.error(
+            f"Read Dealify Worker By ID Failed - Validation Error - Data: \n{ve.json()} \n Values: \n{row}"
+        )
+        return None
+    except IndexError as ie:
+        logging.error(
+            f"Read Dealify Worker By ID Failed - Index Error - Data: \n{ie} \n Values: \n {row}"
+        )
+        return None
+
+
+@asyncio.coroutine
+def read_dealify_task_ids_by_type(task_type, conn):
+    if not isinstance(task_type, int):
+        logging.error(f"Task Type must be an Integer - Got: {type(search_id)}")
+        return None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(read_dealify_task_ids_by_type_sproc, [task_type])
+    try:
+        (row, ) = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.error(
+            f"Read Dealify Task ID's By Type - Value Error - No Task ID's for Task Type: {task_type}"
+        )
+        return None
+    task_ids = [(item) for item in row]
+    logging.info(f"{task_ids}")
+    return task_ids

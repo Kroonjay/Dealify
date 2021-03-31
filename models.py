@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
-from enum import Enum
-from typing import List, Dict
+from enum import Enum, IntEnum
+from typing import List, Dict, Set
 import json
 
 
@@ -13,12 +13,12 @@ def model_to_json_string(model):
     return json.dumps(model.dict())
 
 
-class DealifySources(Enum):
+class DealifySources(IntEnum):
     Global = 0  # Search errythang
     Craigslist = 1
 
 
-class LocationRestrictionTypes(Enum):
+class LocationRestrictionTypes(IntEnum):
     Unrestricted = 0  # Search errywhere
     # Find Country from source_zip_code field and search all sites in same country
     HomeCountry = 1
@@ -30,21 +30,21 @@ class LocationRestrictionTypes(Enum):
     MilesFromHome = 7
 
 
-class DealifySearchTaskTypes(Enum):
-    Dormont = 0  # No Current Task
+class DealifySearchTaskTypes(IntEnum):
+    Unrestricted = 0  # Worker will attempt to execute all Tasks - Dangerous
     SearchOverdueCraigslistQueries = 1  # work_overdue_craigslist_queries
     CraigslistSites = 2  # Refresh Craigslist Sites & Location Data
     # Update query_status to 2 based on last_execution_at time
     SetOverdueCraigslistQueries = 3
 
 
-class PriceRestrictionTypes(Enum):
+class PriceRestrictionTypes(IntEnum):
     Unrestricted = 0
     MaxPrice = 1
     DiscountOnly = 2
 
 
-class RestrictionTypes(Enum):
+class RestrictionTypes(IntEnum):
     Unrestricted = 0
     Location = 1
     Price = 2
@@ -61,13 +61,22 @@ class PriceRestrictionConfig(BaseModel):
     max_price: int = None
 
 
-class DealifySearchStatus(Enum):
+class DealifySearchStatus(IntEnum):
     Dormant = 0  # Enabled, but not running and not yet due
     Running = 1  # Worker is actively running Search
     Overdue = 2  # Enabled, but not running and past due
     Disabled = 3  # User Disabled
+    New = 4  # Newly Created Search, set for all new searches until queries are built
     Killed = 6  # Admin Disabled
     Error = 7  # App reported Error
+
+
+class DealifyWorkerStatus(IntEnum):
+    Dormont = 0
+    Running = 1
+    Started = 5
+    Killed = 6  # Admin Kill Requested, Will Finish Current Task but won't start new One
+    Error = 7
 
 
 class DealifyItemBase(BaseModel):
@@ -215,3 +224,21 @@ class CraigslistSite(CraigslistSiteIn):
     last_searched_at: datetime = None
     last_updated_at: datetime = None
     areas: List[str]
+
+
+class DealifyWorkerTaskConfig(BaseModel):
+    allowed_task_types: Set[int] = None
+
+
+class DealifyWorkerIn(BaseModel):
+    worker_name: str = None
+    task_config: str = None
+
+
+class DealifyWorker(DealifyWorkerIn):
+    worker_id: int = None
+    worker_status: int = None  # DealifySearchStatus
+    current_task: int = None
+    task_config: DealifyWorkerTaskConfig = None
+    created_at: datetime = None
+    started_at: datetime = None
