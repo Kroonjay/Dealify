@@ -21,6 +21,6 @@ BASE_LOGGER_NAME = "DealifySearchWorker"
 
 WORKER_LOG_FORMAT = "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"
 
-WORKER_ID = 1
+WORKER_ID = getenv("DEALIFY_WORKER_ID")
 
 DEV_MODE = getenv("DEV_MODE_ENABLED")
