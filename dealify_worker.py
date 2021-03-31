@@ -12,7 +12,7 @@ class DealifyWorker:
 
     def __init__(self):
         self.logger = start_logger()
-        self.worker_id = WORKER_ID
+        self.worker_id = int(WORKER_ID)
         if not self.worker_id:
             logging.critical("Can't Initialize Worker - Worker ID is None")
         self.db_creds = DEALIFY_DB_CREDS

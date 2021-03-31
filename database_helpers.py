@@ -389,7 +389,7 @@ def update_dealify_worker_status(worker_id, new_status, conn):
 @asyncio.coroutine
 def read_dealify_worker_by_id(worker_id, conn):
     if not isinstance(worker_id, int):
-        logging.error(f"Worker ID must be an Integer - Got: {type(search_id)}")
+        logging.error(f"Worker ID must be an Integer - Got: {type(worker_id)}")
         return None
     cur = yield from conn.cursor()
     yield from cur.callproc(read_dealify_worker_by_id_sproc, [worker_id])
