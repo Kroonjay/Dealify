@@ -4,10 +4,12 @@ from models import DealifySearch, DealifyWorkerStatus, CraigslistOverdueSearchTa
 from config import WORKER_LOG_FORMAT, DEV_MODE, BASE_LOGGER_NAME, WORKER_LOG_LEVEL, WORKER_LOG_FILE, SEARCH_CONFIG_CL_CONFIG_KEY_NAME, SEARCH_CONFIG_PRICE_RESTRICTION_KEY_NAME, SEARCH_CONFIG_LOCATION_RESTRICTION_KEY_NAME
 from dealify_utils import log, log_debug, log_error, log_messages
 from database_helpers import set_dormant_dealify_search, set_overdue_craigslist_queries, read_new_dealify_search_ids, read_dealify_search_by_search_id, update_dealify_worker_status
+from task_map import map_task, map_task_config
 import json
 from craigslist_helpers import work_overdue_craigslist_queries, create_craigslist_queries
 
 
+# Legacy, Gross. Functionality now built into validate_task_config
 def get_default_search_task_config(task):
     if not task.task_type:
         log_error(
@@ -22,6 +24,7 @@ def get_default_search_task_config(task):
         return CraigslistOverdueSearchTaskConfig()
 
 
+# Legacy, Gross.  Use validate_dealify_task instead w/ task_config_map
 def validate_search_task_config(task):
     if not task.task_config:
         get_default_search_task_config(task)
@@ -36,6 +39,7 @@ def validate_search_task_config(task):
             return None
 
 
+# Legacy, Gross.  Use run_dealify_task w/ task_map
 async def execute_dealify_search_task(task, conn):
     if task.task_type not in [task_type.value for task_type in DealifySearchTaskTypes]:
         log_data = f"Task Type: {task.task_type}"
@@ -44,18 +48,54 @@ async def execute_dealify_search_task(task, conn):
         return None
     log_data = f"Task ID: {task.task_id}"
     log(log_messages().search_worker.log_execute_search_task_started, log_data)
+    task_config = validate_search_task_config(task)
+    if not task_config:
+        log_error(
+            log_messages().search_worker.error_validate_task_config_no_task_config)
+        return None
     if task.task_type == DealifySearchTaskTypes.SearchOverdueCraigslistQueries.value:
-        task_config = validate_search_task_config(task)
-        if not task_config:
-            log_error(
-                log_messages().search_worker.error_validate_task_config_no_task_config)
-            return None
+
         log_data = f"Task ID: {task.task_id}"
         log(log_messages().search_worker.log_execute_search_task_started, log_data)
         await work_overdue_craigslist_queries(conn, **task_config.dict(exclude_unset=True))
     elif task.task_type == DealifySearchTaskTypes.SetOverdueCraigslistQueries.value:
         await set_overdue_craigslist_queries(conn)
     log(log_messages().search_worker.log_execute_search_task_finished, log_data)
+    return True
+
+
+def validate_task_config(task):
+
+    task_config_base = map_task_config(task.task_type)
+    if not task_config_base:
+        log_error(
+            log_messages().search_worker.error_value_is_none.format(value='Task Config'))
+        return None
+    if not task.task_config:
+        log("No Custom Task Config Specified, Using Default")
+        return task_config_base()  # If no custom task_config specified with task, use Default
+    try:
+        task_config = task_config_base(**json.loads(task.task_config))
+        log(f"Task Config Validated Successfully")
+        return task_config
+    except ValidationError as ve:
+        log_error(
+            log_messages().search_worker.error_validate_task_config_ve, data=ve.json())
+        return None
+
+
+async def run_dealify_task(task, conn):
+    task_func = map_task(task.task_type)
+    if not task_func:
+        log_error(
+            log_messages().search_worker.error_execute_search_task_unfamiliar_task_type)
+        return None
+    task_config = validate_task_config(task)
+    if task_config:
+        await task_func(conn, **task_config.dict(exclude_unset=True))
+    else:
+        await task_func(conn)
+    log(log_messages().search_worker.log_execute_search_task_finished)
     return True
 
 
@@ -74,29 +114,6 @@ def start_logger(log_level=WORKER_LOG_LEVEL, dev=DEV_MODE):
         root_logger.addHandler(ch)
     base_logger = logging.getLogger(BASE_LOGGER_NAME)
     return base_logger
-
-
-async def create_queries_for_new_searches(conn):
-    new_search_ids = await read_new_dealify_search_ids(conn)
-    if not new_search_ids:
-        log(log_messages().search_worker.log_build_queries_task_no_new_searches)
-        return None
-    log_data = f"New Searches Total: {len(new_search_ids)}"
-    log(log_messages().search_worker.log_build_queries_task_started, log_data)
-    for search_id in new_search_ids:
-        search = await read_dealify_search_by_search_id(search_id, conn)
-        log_data = f"Search ID: {search_id} - Sources: {search.sources}"
-        if not search:
-            log_error(log_messages(
-            ).search_worker.error_build_queries_task_unknown_search_id, log_data)
-            continue
-        if DealifySources.Craigslist.value in search.sources:
-            await create_craigslist_queries(search, conn)
-        log_debug(
-            log_messages().search_worker.debug_build_queries_query_finished, log_data)
-    await set_dormant_dealify_search(search_id, conn)
-    log(log_messages().search_worker.log_build_queries_task_finished)
-    return
 
 
 async def set_worker_status(worker, new_status, conn):

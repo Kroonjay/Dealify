@@ -8,6 +8,9 @@ create_craigslist_site_sproc = "CreateCraigslistSite"
 read_craigslist_subdomain_by_site_id_sproc = "ReadCraigslistSubdomainBySiteId"
 # Values: @country_param
 read_craigslist_site_ids_by_country_sproc = "ReadCraigslistSiteIdsByCountry"
+
+read_craigslist_site_ids_by_state_sproc = "ReadCraigslistSiteIdsByState"
+
 # Values: @search_id_param
 read_dealify_search_by_id_sproc = "ReadDealifySearchById"
 
@@ -40,3 +43,5 @@ read_dealify_worker_by_id_sproc = "ReadDealifyWorkerById"
 update_dealify_worker_status_sproc = "UpdateDealifyWorkerStatus"
 
 read_dealify_task_ids_by_type_sproc = "ReadDealifyTaskIdsByType"
+# Values: @worker_id_param, @current_task_param
+update_dealify_current_task_by_id_sproc = "UpdateDealifyCurrentTaskById"

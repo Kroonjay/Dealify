@@ -149,7 +149,19 @@ def read_craigslist_site_ids_by_country(country, conn):
     cur = yield from conn.cursor()
     yield from cur.callproc(read_craigslist_site_ids_by_country_sproc, [country])
     site_ids = yield from cur.fetchall()
-    logging.info("Retrieved All Site IDS")
+    logging.info(f"Retrieved All Site IDS for Country: {country}")
+    return site_ids
+
+
+@asyncio.coroutine
+# Returns a Generator of Tuples where SiteID is first val - Correct Usage: for site_id, in await read_all_craigslist_site_ids(conn):
+def read_craigslist_site_ids_by_state(state, conn):
+    site_ids = None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(read_craigslist_site_ids_by_state_sproc, [state])
+    site_ids = yield from cur.fetchall()
+    logging.error(
+        f"Retrieved All Site IDS for State: {state} - Site IDS: {site_ids}")
     return site_ids
 
 
@@ -443,3 +455,15 @@ def read_dealify_task_ids_by_type(task_type, conn):
     task_ids = [(item) for item in row]
     logging.info(f"{task_ids}")
     return task_ids
+
+
+@asyncio.coroutine
+def update_dealify_worker_current_task(worker_id, task_id, conn):
+    if not isinstance(worker_id, int):
+        logging.error(f"Worker ID must be an Integer - Got: {type(worker_id)}")
+        return None
+    if not isinstance(task_id, int):
+        logging.error(f"Task ID must be an Integer - Got: {type(task_id)}")
+        return None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(update_dealify_current_task_by_id_sproc, [worker_id, task_id])

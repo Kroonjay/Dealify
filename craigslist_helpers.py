@@ -8,8 +8,8 @@ from craigslist import CraigslistForSale
 from craigslist_config import CL_SITES_URL, CL_SITE_IGNORED_SUBDOMAINS, CL_NOMINATIM_AGENT, CL_QUERY_SLEEP_INTERVAL_SECONDS_MIN, CL_QUERY_SLEEP_INTERVAL_SECONDS_MAX, CL_QUERY_MAX_RETRIES, CL_QUERY_MAX_QUERIES, CL_QUERY_RATE_LIMIT_SLEEP_INTERVAL_SECONDS
 from dealify_utils import log, log_error, log_debug
 from parsers import parse_price, parse_special
-from models import CraigslistItemIn, CraigslistQueryIn, CraigslistQuery, CraigslistQueryExecDetails, CraigslistSiteIn, LocationRestrictionTypes, RestrictionTypes
-from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, read_next_overdue_craigslist_query_id, start_overdue_craigslist_query, finish_craigslist_query
+from models import CraigslistItemIn, LocationDetails, CraigslistQueryIn, CraigslistQuery, CraigslistQueryExecDetails, CraigslistSiteIn, LocationRestrictionTypes, RestrictionTypes
+from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, read_next_overdue_craigslist_query_id, start_overdue_craigslist_query, finish_craigslist_query, read_craigslist_site_ids_by_state
 import json
 from geopy.geocoders import Nominatim
 import asyncio
@@ -46,6 +46,36 @@ def query_site_location(cl_site):
                 f"No County - {cl_site.site_url} - Address: {parse_special(location.address)}")
 
     return cl_site
+
+
+def query_location(address):
+    if not isinstance(address, str):
+        if isinstance(address, int):
+            address = str(address)
+        else:
+            logging.error(f"Address Must be a String, Got: {type(address)}")
+            return None
+    geolocator = Nominatim(user_agent=CL_NOMINATIM_AGENT)
+    location = geolocator.geocode(address)
+    split_address = location.address.split(",")
+    # Format should be City, County, State, Zip, Country
+    if len(split_address) == 5:
+        try:
+            loc_details = LocationDetails(
+                city=parse_special(split_address[0]).strip(),
+                county=parse_special(split_address[1]).strip(),
+                state=parse_special(split_address[2]).strip(),
+                zip_code=parse_special(split_address[3]).strip(),
+                country=parse_special(split_address[4]).strip())
+            return loc_details
+        except ValidationError as ve:
+            logging.error(
+                f"Failed to Validate Location - Details: {ve.json()}")
+            return None
+    else:
+        logging.error(
+            f"Failed to Validate Location - Not Enough Address Sections - Needed 5, Got {len(split_address)}")
+        return None
 
 
 def query_site_areas(cl_site):
@@ -188,9 +218,22 @@ async def query_unrestricted_sites(dealify_search, conn):
             cl_sites = await read_craigslist_site_ids_by_country(
                 'United States', conn)
             return cl_sites
+        elif dealify_search.search_config.location_restriction_config.restriction_type == LocationRestrictionTypes.HomeState.value:
+
+            source_loc = query_location(
+                dealify_search.search_config.location_restriction_config.source_zip)
+            if not source_loc:
+                logging.error(
+                    f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {dealify_search.search_config.location_restriction_config.source_zip}")
+                return cl_sites
+            logging.error(f"SOURCE LOCATION: {source_loc}")
+            cl_sites = await read_craigslist_site_ids_by_state(source_loc.state, conn)
+            logging.error(f"CL SITES: {cl_sites}")
+            return cl_sites
         else:
             logging.error(
                 f"Location Restriction Unsupported! - Option: {dealify_search.search_config.location_restriction_config.restriction_type}")
+
     else:
         logging.critical("Unrestricted Search Requested - Watch Out!")
         return cl_sites

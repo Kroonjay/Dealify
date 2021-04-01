@@ -17,7 +17,7 @@ class DealifySearchWorkerLogs(BaseModel):
     log_build_queries_task_finished: str = "Create Queries for New Searches Task - Finished"
     error_build_queries_task_unknown_search_id: str = "Failed to Retrieve Dealify Search - Invalid Search ID"
     debug_build_queries_query_finished: str = "Create Queries for New Searches Task - Completed Query"
-    error_value_is_none: str = "Required Value is None"
+    error_value_is_none: str = "Required Value '{value}' is None"
     error_enum_invalid_option: str = "{enum_name} Received Invalid Option - New Value: {new_value} Does Not Exist in Enum Values"
     error_enum_illegal_option: str = "{enum_name} Received Illegal Option - Illegal to Update to New Value: {new_value} from Old Value: {old_value}"
     log_enum_update_finished: str = "{enum_name} Update Finished - Successfully Updated to New Value: {new_value} from Old Value: {old_value}"

@@ -3,7 +3,7 @@ import logging
 from config import DEALIFY_DB_CREDS, WORKER_LOG_FILE, WORKER_ID
 from database_helpers import connect_dealify_db, disconnect_dealify_db, start_next_dealify_search_task, read_dealify_worker_by_id, read_dealify_task_ids_by_type, read_dealify_search_task_by_id, update_dealify_worker_status
 from models import DealifySearchTask, DealifyWorkerStatus
-from dealify_helpers import execute_dealify_search_task, start_logger, set_worker_status
+from dealify_helpers import execute_dealify_search_task, start_logger, set_worker_status, run_dealify_task
 from datetime import datetime
 from itertools import cycle
 
@@ -89,6 +89,10 @@ class DealifyWorker:
             new_allowed_task_ids = []
             for task_type in new_allowed_task_types:
                 task_ids = await read_dealify_task_ids_by_type(task_type, self.conn)
+                if not task_ids:
+                    self.logger.error(
+                        f"No Task ID's Found for Task Type: {task_type}")
+                    continue
                 new_allowed_task_ids.extend(task_ids)
             if not new_allowed_task_ids:
                 self.logger.critical(
@@ -174,7 +178,7 @@ class DealifyWorker:
                     f"Can't Run - No Tasks - Attempt {retries} of {self.max_retries}")
                 retries += 1
                 continue
-            success = await execute_dealify_search_task(self.current_task, self.conn)
+            success = await run_dealify_task(self.current_task, self.conn)
             if success:
                 self.logger.info(
                     f"sucessfully executed Task ID: {self.current_task.task_id} - Sleeping for {self.task_change_interval_seconds}s Before Next Task")

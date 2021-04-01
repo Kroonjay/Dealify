@@ -36,6 +36,7 @@ class DealifySearchTaskTypes(IntEnum):
     CraigslistSites = 2  # Refresh Craigslist Sites & Location Data
     # Update query_status to 2 based on last_execution_at time
     SetOverdueCraigslistQueries = 3
+    BuildQueriesForNewDealifySearches = 4
 
 
 class PriceRestrictionTypes(IntEnum):
@@ -203,6 +204,14 @@ class CraigslistQueryExecDetails(BaseModel):
     area: str = None
     category: str = None
     filters: Dict = None
+
+
+class LocationDetails(BaseModel):
+    city: str = None
+    state: str = None
+    county: str = None
+    zip_code: str = None
+    country: str = None
 
 
 class CraigslistSiteIn(BaseModel):
