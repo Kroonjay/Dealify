@@ -7,7 +7,7 @@ import json
 from pymysql.err import IntegrityError
 from pydantic import ValidationError
 
-from models import DealifyWorkerTaskConfig, DealifyWorker, model_to_json_string, model_to_values, CraigslistQuery, DealifySearchTask, DealifySearchStatus, LocationRestrictionConfig, PriceRestrictionConfig, PriceRestrictionTypes, CraigslistConfig, DealifySearch, SearchConfig
+from models import CraigslistItem, DealifyWorkerTaskConfig, DealifyWorker, model_to_json_string, model_to_values, CraigslistQuery, DealifySearchTask, DealifySearchStatus, LocationRestrictionConfig, PriceRestrictionConfig, PriceRestrictionTypes, CraigslistConfig, DealifySearch, SearchConfig
 from config import DEALIFY_DB_CREDS, SEARCH_CONFIG_CL_CONFIG_KEY_NAME, SEARCH_CONFIG_LOCATION_RESTRICTION_KEY_NAME, SEARCH_CONFIG_LOCATION_UNRESTRICTED_SEARCH_KEY, SEARCH_CONFIG_PRICE_RESTRICTION_KEY_NAME
 from sprocs import *
 from prep_stmts import read_all_craigslist_site_ids_stmt
@@ -51,8 +51,42 @@ def row_to_dealify_search(row):
         return ds
     except ValidationError as ve:
         logging.error(
-            f"Failed to Build Dealify Search From Row, Data: {ve.json}")
+            f"Failed to Build Dealify Search From Row - Validation Error -  Data: {ve.json()}")
         return None
+
+
+def row_to_craigslist_item(row):
+    vals_per_row = 15
+    if len(row) < vals_per_row:
+        logging.error(
+            f"Row to Craigslist Item - Received Row with Invalid Number of Values - Expected {vals_per_row}, Got {len(row)} - Data: {row}")
+        return None
+    try:
+        cl_item = CraigslistItem(
+            item_id=row[0],
+            item_name=row[1],
+            price=row[2],
+            search_id=row[3],
+            source_url=row[4],
+            tags=row[5],
+            created_at=row[6],
+            last_seen_at=row[7],
+            source_id=row[8],
+            posted_at=row[9],
+            is_deleted=row[10],
+            has_image=row[11],
+            last_updated=row[12],
+            repost_of=row[13],
+            item_location=row[14]
+        )
+        return cl_item
+    except ValidationError as ve:
+        logging.error(
+            f"Failed to Build Craigslist Item from Row - Validation Error - Data: {ve.json()}")
+        return None
+    logging.info(
+        f"Row to Craigslist Item - Conversion Successful - Item ID: {item.item_id}")
+    return cl_item
 
 
 async def connect_dealify_db(dealify_db_creds):
@@ -194,6 +228,34 @@ def read_next_overdue_craigslist_query_id(conn):
 
 
 @asyncio.coroutine
+def set_deleted_craigslist_item(conn, item_id: int):
+    cur = yield from conn.cursor()
+    yield from cur.callproc(set_deleted_craigslist_item_sproc, [item_id])
+
+    try:
+        (row, ) = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.info(
+            f"Set Deleted Craigslist Item - Value Error - No Item Found for ID: {item_id}")
+        return None
+    item = None
+    if row:
+        item = row_to_craigslist_item(row)
+    if not item:
+        logging.error(
+            f"Set Deleted Craigslist Item - Failed to Convert Row to Object - Item ID: {item_id}")
+        return None
+    if item.is_deleted:
+        logging.info(
+            f"Set Deleted Craigslist Item - Updated Successfully - Item ID: {item_id}")
+        return True
+    else:
+        logging.error(
+            f"Set Deleted Craigslist Item - Update Not Successful, is_deleted is False - Item ID: {item_id}")
+        return None
+
+
+@asyncio.coroutine
 def start_overdue_craigslist_query(query_id, conn):
     if not isinstance(query_id, int):
         logging.error("Search ID must be an Integer")
@@ -265,12 +327,48 @@ def user_disable_dealify_search(search_id, conn):
 
 
 @asyncio.coroutine
-def read_craigslist_items_by_search_id(search_id, conn):
+def read_craigslist_items_by_search_id(search_id, conn, limit=10):
+    items = []
+
     if not isinstance(search_id, int):
         logging.error(f"Search ID must be an Integer - Got: {type(search_id)}")
         return None
     cur = yield from conn.cursor()
-    yield from cur.callproc(read_craigslist_items_by_search_id_sproc, [search_id])
+    yield from cur.callproc(read_craigslist_items_by_search_id_sproc, [search_id, limit])
+    try:
+        rows = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.error(
+            "Read Craigslist Items By Search ID - Value Error - No Items")
+        return None
+
+    for row in rows:
+        try:
+            item = CraigslistItem(
+                item_id=row[0],
+                item_name=row[1],
+                price=row[2],
+                search_id=row[3],
+                source_url=row[4],
+                tags=row[5],
+                created_at=row[6],
+                last_seen_at=row[7],
+                source_id=row[8],
+                posted_at=row[9],
+                is_deleted=row[10],
+                has_image=row[11],
+                last_updated=row[12],
+                repost_of=row[13],
+                item_location=row[14]
+            )
+            items.append(item)
+        except ValidationError as ve:
+            logging.error(
+                f"Failed to Retrieve Craigslist Item - Data: {ve.json()}")
+            continue
+    logging.info(
+        f"Read Craigslist Items By Search ID - Found {len(items) if items else 0} for Search ID {search_id}")
+    return items
 
 
 @asyncio.coroutine
@@ -455,6 +553,33 @@ def read_dealify_task_ids_by_type(task_type, conn):
     task_ids = [(item) for item in row]
     logging.info(f"{task_ids}")
     return task_ids
+
+
+@asyncio.coroutine
+def read_old_craigslist_items(interval_days, conn, limit=250):
+
+    cur = yield from conn.cursor()
+    yield from cur.callproc(read_old_craigslist_item_ids_sproc, [interval_days, limit])
+    try:
+        rows = yield from cur.fetchall()
+    except ValueError as vale:
+        logging.error(
+            f"Read Old Craigslist Item ID's - Value Error - No Items Older than {interval_days} Days to Retrieve"
+        )
+        return None
+    old_items = []
+    for row in rows:
+        item = row_to_craigslist_item(row)
+        if item:
+            old_items.append(item)
+        else:
+            logging.error(
+                f"Read Old Craigslist Items - Failed to Build Item from Row - Data: {row}")
+            continue
+
+    logging.info(
+        f"Read Old Craigslist Item ID's - Successfully Retrieved {len(old_items)} Items Older than {interval_days} Days")
+    return old_items
 
 
 @asyncio.coroutine

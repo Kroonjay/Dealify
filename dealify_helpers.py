@@ -81,7 +81,7 @@ def validate_task_config(task):
     except ValidationError as ve:
         log_error(
             log_messages().search_worker.error_validate_task_config_ve, data=ve.json())
-        return None
+        return task_config_base()
 
 
 async def run_dealify_task(task, conn):

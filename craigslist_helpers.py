@@ -5,11 +5,11 @@ from datetime import datetime
 from urllib.parse import urlparse
 from pydantic import ValidationError
 from craigslist import CraigslistForSale
-from craigslist_config import CL_SITES_URL, CL_SITE_IGNORED_SUBDOMAINS, CL_NOMINATIM_AGENT, CL_QUERY_SLEEP_INTERVAL_SECONDS_MIN, CL_QUERY_SLEEP_INTERVAL_SECONDS_MAX, CL_QUERY_MAX_RETRIES, CL_QUERY_MAX_QUERIES, CL_QUERY_RATE_LIMIT_SLEEP_INTERVAL_SECONDS
+from craigslist_config import *
 from dealify_utils import log, log_error, log_debug
 from parsers import parse_price, parse_special
 from models import CraigslistItemIn, LocationDetails, CraigslistQueryIn, CraigslistQuery, CraigslistQueryExecDetails, CraigslistSiteIn, LocationRestrictionTypes, RestrictionTypes
-from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, read_next_overdue_craigslist_query_id, start_overdue_craigslist_query, finish_craigslist_query, read_craigslist_site_ids_by_state
+from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, read_next_overdue_craigslist_query_id, start_overdue_craigslist_query, finish_craigslist_query, read_craigslist_site_ids_by_state, set_deleted_craigslist_item, read_old_craigslist_items
 import json
 from geopy.geocoders import Nominatim
 import asyncio
@@ -298,3 +298,48 @@ async def work_overdue_craigslist_queries(conn, query_sleep_seconds_min=CL_QUERY
         await asyncio.sleep(sleep_for)
         queries += 1
     logging.info("Finished All Overdue Craigslist Queries!")
+
+
+def craigslist_item_is_deleted(cl_item):
+    if cl_item.is_deleted:
+        return True
+    response = requests.get(cl_item.source_url)
+    if not response.status_code == 200:
+        if response.status_code == 404:
+            logging.info(
+                f"Craigslist Item Check if Deleted - Received 404 Response for Item - Setting is_deleted True - Item ID: {cl_item.item_id}")
+            return True
+        logging.error(
+            f"Craigslist Item Check if Deleted - Receieved Non-200 Response for Item - Status Code: {response.status_code} - Item ID: {cl_item.item_id}")
+        return None
+    soup = BeautifulSoup(response.content, 'html.parser')
+    deleted_headers = soup.find_all('h2')
+    if deleted_headers:
+        logging.info(
+            f"Craigslist Item Check if Deleted - Found H2 Header for Listing - Item was Probably Deleted")
+        return True
+    return None
+
+
+@asyncio.coroutine
+async def check_deleted_old_craigslist_items(conn, old_interval_days=CL_OLD_ITEMS_INTERVAL_DAYS, sleep_seconds_min=CL_OLD_ITEMS_SLEEP_INTERVAL_SECONDS_MIN, sleep_seconds_max=CL_OLD_ITEMS_SLEEP_INTERVAL_SECONDS_MAX, rate_limit_sleep_seconds=CL_OLD_ITEMS_RATE_LIMIT_SLEEP_INTERVAL_SECONDS, max_items=CL_OLD_ITEMS_MAX_ITEMS):
+    retries = 0
+    items = 0
+
+    items_to_check = await read_old_craigslist_items(old_interval_days, conn, max_items)
+    logging.info(
+        f"Check Deleted Old Craigslist Items - Starting Update - Items to Update: {len(items_to_check)}")
+    for item in items_to_check:
+        deleted = craigslist_item_is_deleted(item)
+        if deleted:
+            success = await set_deleted_craigslist_item(conn, item.item_id)
+            if not success:
+                logging.error(
+                    f"Check Deleted Old Craigslist Items - Failed to Set Deleted Craigslist Item, Success is False - Item ID: {item.item_id}")
+            else:
+                logging.info(
+                    f"Check Deleted Old Craigslist Items - Successfully Updated Deleted Item - Item ID: {item.item_id}")
+        sleep_seconds = randint(sleep_seconds_min, sleep_seconds_max)
+        logging.info(
+            f"Check Deleted Old Craigslist Items - Finished Update for Item {item.item_id} - Sleeping for {sleep_seconds} Before Checking Next Item")
+        await asyncio.sleep(sleep_seconds)

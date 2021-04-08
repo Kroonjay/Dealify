@@ -21,7 +21,7 @@ start_overdue_craigslist_query_sproc = "StartOverdueCraigslistQuery"
 finish_craigslist_query_sproc = "FinishCraigslistQuery"
 # Values: @search_id_param
 user_disable_dealify_search_sproc = "UserDisableDealifySearch"
-# Values: @search_id_param
+# Values: @search_id_param, @limit_param
 read_craigslist_items_by_search_id_sproc = "ReadCraigslistItemsBySearchId"
 # Values: @task_name_param, @task_type_param, @task_status_param, @task_config_param
 create_dealify_search_task_sproc = "CreateDealifySearchTask"
@@ -45,3 +45,7 @@ update_dealify_worker_status_sproc = "UpdateDealifyWorkerStatus"
 read_dealify_task_ids_by_type_sproc = "ReadDealifyTaskIdsByType"
 # Values: @worker_id_param, @current_task_param
 update_dealify_current_task_by_id_sproc = "UpdateDealifyCurrentTaskById"
+# Values: @item_id_param
+set_deleted_craigslist_item_sproc = "SetDeletedCraigslistItem"
+# Values: @interval_days_param, @limit_param
+read_old_craigslist_item_ids_sproc = "ReadOldActiveCraigslistItems"

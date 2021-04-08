@@ -19,8 +19,12 @@ WORKER_LOG_LEVEL = logging.INFO
 
 BASE_LOGGER_NAME = "DealifySearchWorker"
 
+DISCORD_TOKEN = getenv("DISCORD_TOKEN")
+
 WORKER_LOG_FORMAT = "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"
 
 WORKER_ID = getenv("DEALIFY_WORKER_ID")
 
 DEV_MODE = getenv("DEV_MODE_ENABLED")
+
+DISCORD_NEW_ITEM_HEADER_ROW = ["Name", "Price", "Location", "URL"]

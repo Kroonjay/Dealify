@@ -37,6 +37,7 @@ class DealifySearchTaskTypes(IntEnum):
     # Update query_status to 2 based on last_execution_at time
     SetOverdueCraigslistQueries = 3
     BuildQueriesForNewDealifySearches = 4
+    CheckDeletedOldCraigslistItems = 5
 
 
 class PriceRestrictionTypes(IntEnum):
@@ -100,6 +101,14 @@ class CraigslistOverdueSearchTaskConfig(BaseModel):
     query_sleep_seconds_max: int = 20
     query_max_retries: int = 10
     max_queries: int = 250
+
+
+class CheckOldCraigslistItemDeletedTaskConfig(BaseModel):
+    old_interval_days: int = 2
+    sleep_seconds_min: int = 5
+    sleep_seconds_max: int = 20
+    rate_limit_sleep_seconds: int = 60
+    max_items: int = 250
 
 
 class DealifySearchTaskIn(BaseModel):

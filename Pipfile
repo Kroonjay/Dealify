@@ -11,6 +11,8 @@ pydantic = "*"
 aiomysql = "*"
 cryptography = "*"
 geopy = "*"
+"discord.py" = "*"
+tabulate = "*"
 
 [requires]
 python_version = "3.8"

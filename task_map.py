@@ -1,5 +1,5 @@
-from models import DealifySearchTaskTypes, CraigslistOverdueSearchTaskConfig
-from craigslist_helpers import work_overdue_craigslist_queries
+from models import DealifySearchTaskTypes, CraigslistOverdueSearchTaskConfig, CheckOldCraigslistItemDeletedTaskConfig
+from craigslist_helpers import work_overdue_craigslist_queries, check_deleted_old_craigslist_items
 from database_helpers import set_overdue_craigslist_queries
 from dealify_tasks import create_queries_for_new_searches
 import logging
@@ -10,11 +10,12 @@ task_map = {
     # Placeholder, not yet supported
     DealifySearchTaskTypes.CraigslistSites.value: None,
     DealifySearchTaskTypes.SetOverdueCraigslistQueries.value: set_overdue_craigslist_queries,
-    DealifySearchTaskTypes.BuildQueriesForNewDealifySearches.value: create_queries_for_new_searches}
+    DealifySearchTaskTypes.BuildQueriesForNewDealifySearches.value: create_queries_for_new_searches,
+    DealifySearchTaskTypes.CheckDeletedOldCraigslistItems: check_deleted_old_craigslist_items}
 
 task_config_map = {
-    DealifySearchTaskTypes.SearchOverdueCraigslistQueries.value: CraigslistOverdueSearchTaskConfig
-}
+    DealifySearchTaskTypes.SearchOverdueCraigslistQueries.value: CraigslistOverdueSearchTaskConfig,
+    DealifySearchTaskTypes.CheckDeletedOldCraigslistItems: CheckOldCraigslistItemDeletedTaskConfig}
 
 
 def map_task_config(task_type: int):
