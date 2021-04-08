@@ -200,6 +200,18 @@ def read_craigslist_site_ids_by_state(state, conn):
 
 
 @asyncio.coroutine
+# Returns a Generator of Tuples where SiteID is first val - Correct Usage: for site_id, in await read_all_craigslist_site_ids(conn):
+def read_craigslist_site_ids_by_city(city, conn):
+    site_ids = None
+    cur = yield from conn.cursor()
+    yield from cur.callproc(read_craigslist_site_ids_by_state_sproc, [city])
+    site_ids = yield from cur.fetchall()
+    logging.error(
+        f"Retrieved All Site IDS for State: {state} - Site IDS: {site_ids}")
+    return site_ids
+
+
+@asyncio.coroutine
 def read_dealify_search_by_search_id(search_id, conn):
     if not isinstance(search_id, int):
         logging.error("Search ID must be an Integer")
@@ -228,9 +240,9 @@ def read_next_overdue_craigslist_query_id(conn):
 
 
 @asyncio.coroutine
-def set_deleted_craigslist_item(conn, item_id: int):
+def set_deleted_craigslist_item(conn, item_id: int, is_deleted: bool):
     cur = yield from conn.cursor()
-    yield from cur.callproc(set_deleted_craigslist_item_sproc, [item_id])
+    yield from cur.callproc(set_deleted_craigslist_item_sproc, [item_id, is_deleted])
 
     try:
         (row, ) = yield from cur.fetchall()
@@ -245,7 +257,7 @@ def set_deleted_craigslist_item(conn, item_id: int):
         logging.error(
             f"Set Deleted Craigslist Item - Failed to Convert Row to Object - Item ID: {item_id}")
         return None
-    if item.is_deleted:
+    if item.is_deleted == is_deleted:
         logging.info(
             f"Set Deleted Craigslist Item - Updated Successfully - Item ID: {item_id}")
         return True

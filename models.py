@@ -147,10 +147,10 @@ class CraigslistItem(DealifyItem):
 
 class CraigslistConfig(BaseModel):
     queries: List[str]  # List of queries to search on Craigslist
+    categories: List[str]  # List of Craigslist Category Codes to Search
     interval_mins: int = 1440
     search_titles: bool = False
     require_image: bool = False
-    category: str = None
 
 
 class SearchConfigIn(BaseModel):

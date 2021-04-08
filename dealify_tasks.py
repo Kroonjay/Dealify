@@ -1,6 +1,7 @@
 from dealify_utils import log, log_debug, log_error, log_messages
 from database_helpers import read_new_dealify_search_ids, read_dealify_search_by_search_id, set_dormant_dealify_search
 from craigslist_helpers import create_craigslist_queries
+from models import DealifySources
 
 
 async def create_queries_for_new_searches(conn):

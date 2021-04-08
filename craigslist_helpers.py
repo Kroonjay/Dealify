@@ -9,7 +9,7 @@ from craigslist_config import *
 from dealify_utils import log, log_error, log_debug
 from parsers import parse_price, parse_special
 from models import CraigslistItemIn, LocationDetails, CraigslistQueryIn, CraigslistQuery, CraigslistQueryExecDetails, CraigslistSiteIn, LocationRestrictionTypes, RestrictionTypes
-from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, read_next_overdue_craigslist_query_id, start_overdue_craigslist_query, finish_craigslist_query, read_craigslist_site_ids_by_state, set_deleted_craigslist_item, read_old_craigslist_items
+from database_helpers import create_craigslist_query, create_craigslist_site, create_craigslist_item, read_craigslist_subdomain_by_site_id, read_all_craigslist_site_ids, read_craigslist_site_ids_by_country, read_next_overdue_craigslist_query_id, start_overdue_craigslist_query, finish_craigslist_query, read_craigslist_site_ids_by_state, set_deleted_craigslist_item, read_old_craigslist_items, read_craigslist_site_ids_by_city
 import json
 from geopy.geocoders import Nominatim
 import asyncio
@@ -213,27 +213,34 @@ async def query_craigslist_items(cl_query, conn):
 async def query_unrestricted_sites(dealify_search, conn):
     cl_sites = None
     if dealify_search.search_config.location_restriction_config:
+        source_loc = query_location(
+            dealify_search.search_config.location_restriction_config.source_zip)
         if dealify_search.search_config.location_restriction_config.restriction_type == LocationRestrictionTypes.UnitedStatesOnly.value:
             logging.debug("Location Restricted to US Only")
             cl_sites = await read_craigslist_site_ids_by_country(
                 'United States', conn)
             return cl_sites
         elif dealify_search.search_config.location_restriction_config.restriction_type == LocationRestrictionTypes.HomeState.value:
-
-            source_loc = query_location(
-                dealify_search.search_config.location_restriction_config.source_zip)
             if not source_loc:
                 logging.error(
                     f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {dealify_search.search_config.location_restriction_config.source_zip}")
                 return cl_sites
-            logging.error(f"SOURCE LOCATION: {source_loc}")
             cl_sites = await read_craigslist_site_ids_by_state(source_loc.state, conn)
-            logging.error(f"CL SITES: {cl_sites}")
+            logging.debug(
+                f"Query Unrestricted Sites - Successfully Retrieved Sites for HomeState Search - Sites: {cl_sites}")
             return cl_sites
+        elif dealify_search.search_config.location_restriction_config.restriction_type == LocationRestrictionTypes.HomeCity.value:
+            logging.debug(
+                f"Query Unrestricted Sites - Location Restricted to HomeCity Only - Search ID: {dealify_search.search_id}")
+            if not source_loc:
+                logging.error(
+                    f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {dealify_search.search_config.location_restriction_config.source_zip}")
+                return cl_sites
+            cl_sites = await read_craigslist_site_ids_by_city(source_loc.city, conn)
         else:
             logging.error(
                 f"Location Restriction Unsupported! - Option: {dealify_search.search_config.location_restriction_config.restriction_type}")
-
+        return cl_sites
     else:
         logging.critical("Unrestricted Search Requested - Watch Out!")
         return cl_sites
@@ -241,25 +248,40 @@ async def query_unrestricted_sites(dealify_search, conn):
 
 async def create_craigslist_queries(dealify_search, conn):
     cl_sites = await query_unrestricted_sites(dealify_search, conn)
-    if not cl_sites:
-        logging.error("No Sites!!!!")
+    queries = dealify_search.search_config.craigslist_config.queries
+    categories = dealify_search.search_config.craigslist_config.categories
+    try:
+        total_new_queries = len(cl_sites) * len(queries) * len(categories)
+    except TypeError as te:
+        logging.error(
+            f"Failed to Calculate Total New Queries - Required Value has no Length - Sites: {cl_sites} - Queries: {queries} - Categories: {categories} - Data: {te}")
         return None
+    logging.info(
+        f"Create Craigslist Queries - Started - Search ID: {dealify_search.search_id} - Total Queries: {total_new_queries}")
+    new_queries = 0
     for site_id, in cl_sites:
-        for query in dealify_search.search_config.craigslist_config.queries:
-            try:
-                cl_query = CraigslistQueryIn(
-                    search_id=dealify_search.search_id,
-                    query=query,
-                    site_id=site_id,
-                    **dealify_search.search_config.craigslist_config.dict()
+        for query in queries:
+            for category in categories:
+                try:
+                    cl_query = CraigslistQueryIn(
+                        search_id=dealify_search.search_id,
+                        query=query,
+                        site_id=site_id,
+                        **dealify_search.search_config.craigslist_config.dict()
 
-                )
-            except ValidationError as ve:
-                logging.error(
-                    f"Failed to Create Craigslist Query - Data: {ve.json()}")
-                continue
-            await create_craigslist_query(cl_query, conn)
-            logging.info("Created Craigslist Query")
+                    )
+                except ValidationError as ve:
+                    logging.error(
+                        f"Failed to Create Craigslist Query - Data: {ve.json()}")
+                    continue
+                logging.debug(
+                    f"Create Craigslist Queries - Validation Successful - Query Data: {cl_query.json()}")
+                await create_craigslist_query(cl_query, conn)
+                new_queries += 1
+                logging.info(
+                    f"Successfully Created Craigslist Query {new_queries} of {total_new_queries} for Search ID: {dealify_search.search_id}")
+    logging.info(
+        f"Create Craigslist Queries - Finished - Search ID: {dealify_search.search_id} - Queries Created: {new_queries}")
 
 
 @asyncio.coroutine
@@ -311,14 +333,14 @@ def craigslist_item_is_deleted(cl_item):
             return True
         logging.error(
             f"Craigslist Item Check if Deleted - Receieved Non-200 Response for Item - Status Code: {response.status_code} - Item ID: {cl_item.item_id}")
-        return None
+        return False
     soup = BeautifulSoup(response.content, 'html.parser')
     deleted_headers = soup.find_all('h2')
     if deleted_headers:
         logging.debug(
             f"Craigslist Item Check if Deleted - Found H2 Header for Listing - Item was Probably Deleted - Item ID: {cl_item.item_id}")
         return True
-    return None
+    return False
 
 
 @asyncio.coroutine
@@ -334,14 +356,13 @@ async def check_deleted_old_craigslist_items(conn, old_interval_days=CL_OLD_ITEM
         return
     for item in items_to_check:
         deleted = craigslist_item_is_deleted(item)
-        if deleted:
-            success = await set_deleted_craigslist_item(conn, item.item_id)
-            if not success:
-                logging.error(
-                    f"Check Deleted Old Craigslist Items - Failed to Set Deleted Craigslist Item, Success is False - Item ID: {item.item_id}")
-            else:
-                logging.info(
-                    f"Check Deleted Old Craigslist Items - Successfully Updated Deleted Item - Item ID: {item.item_id}")
+        updated = await set_deleted_craigslist_item(conn, item.item_id, deleted)
+        if not updated:
+            logging.error(
+                f"Check Deleted Old Craigslist Items - Failed to Set Deleted Craigslist Item, Success is False - Item ID: {item.item_id}")
+        else:
+            logging.info(
+                f"Check Deleted Old Craigslist Items - Successfully Updated Deleted Item - Item ID: {item.item_id}")
         sleep_seconds = randint(sleep_seconds_min, sleep_seconds_max)
         logging.info(
             f"Check Deleted Old Craigslist Items - Finished Update for Item {item.item_id} - Sleeping for {sleep_seconds} Before Checking Next Item")
