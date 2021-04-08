@@ -306,8 +306,8 @@ def craigslist_item_is_deleted(cl_item):
     response = requests.get(cl_item.source_url)
     if not response.status_code == 200:
         if response.status_code == 404:
-            logging.info(
-                f"Craigslist Item Check if Deleted - Received 404 Response for Item - Setting is_deleted True - Item ID: {cl_item.item_id}")
+            logging.debug(
+                f"Craigslist Item Check if Deleted - Received 404 Response for Item - Item was Probably Deleted - Item ID: {cl_item.item_id}")
             return True
         logging.error(
             f"Craigslist Item Check if Deleted - Receieved Non-200 Response for Item - Status Code: {response.status_code} - Item ID: {cl_item.item_id}")
@@ -315,8 +315,8 @@ def craigslist_item_is_deleted(cl_item):
     soup = BeautifulSoup(response.content, 'html.parser')
     deleted_headers = soup.find_all('h2')
     if deleted_headers:
-        logging.info(
-            f"Craigslist Item Check if Deleted - Found H2 Header for Listing - Item was Probably Deleted")
+        logging.debug(
+            f"Craigslist Item Check if Deleted - Found H2 Header for Listing - Item was Probably Deleted - Item ID: {cl_item.item_id}")
         return True
     return None
 
@@ -329,6 +329,9 @@ async def check_deleted_old_craigslist_items(conn, old_interval_days=CL_OLD_ITEM
     items_to_check = await read_old_craigslist_items(old_interval_days, conn, max_items)
     logging.info(
         f"Check Deleted Old Craigslist Items - Starting Update - Items to Update: {len(items_to_check)}")
+    if not items_to_check:
+        logging.info(f"Check Deleted Old Craigslist Items - No Items to Check")
+        return
     for item in items_to_check:
         deleted = craigslist_item_is_deleted(item)
         if deleted:
