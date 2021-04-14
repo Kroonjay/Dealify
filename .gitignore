@@ -5,6 +5,7 @@ __pycache__/
 
 # Dealify Exclusions
 *.log
+*sandbox.py
 
 # C extensions
 *.so
