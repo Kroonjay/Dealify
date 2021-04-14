@@ -49,3 +49,7 @@ update_dealify_current_task_by_id_sproc = "UpdateDealifyCurrentTaskById"
 set_deleted_craigslist_item_sproc = "SetDeletedCraigslistItem"
 # Values: @interval_days_param, @limit_param
 read_old_craigslist_item_ids_sproc = "ReadOldActiveCraigslistItems"
+# Values: @status_param, @limit_param
+read_craigslist_queries_by_status_sproc = "ReadCraigslistQueriesByStatus"
+# Values: @query_id_param, @new_status_param
+update_craigslist_query_status_sproc = "UpdateCraigslistQueryStatus"

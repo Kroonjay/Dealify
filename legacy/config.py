@@ -27,4 +27,12 @@ WORKER_ID = getenv("DEALIFY_WORKER_ID")
 
 DEV_MODE = getenv("DEV_MODE_ENABLED")
 
+APP_ROOT_PATH = getenv("APP_ROOT_PATH") if getenv(
+    "APP_ROOT_PATH") else "/Dealify"
+
 DISCORD_NEW_ITEM_HEADER_ROW = ["Name", "Price", "Location", "URL"]
+
+MODEL_REFERENCE_PATH = '#/definitions/'
+
+SCHEMA_PATH = 'schemas/'
+SCHEMA_ACTIVE_FILE_EXTENSION = '-Latest.json'

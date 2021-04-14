@@ -5,7 +5,8 @@ import logging
 import asyncio
 from tabulate import tabulate
 from database_helpers import read_craigslist_items_by_search_id, connect_dealify_db, disconnect_dealify_db
-bot = commands.Bot(command_prefix='$')
+from core.database.db_helpers import start_pool, read_models
+from core.models.craigslist.craigslist_item import CraigslistItem
 
 
 def format_new_item_row(item):
@@ -55,14 +56,13 @@ def format_embedded_new_item_message(item):
         return None
 
 
-@bot.command(name="NewItems")
+@commands.command(name="NewItems")
 async def new_dealify_items(ctx, search_id: int = None, limit: int = 10):
-    conn = await connect_dealify_db(DEALIFY_DB_CREDS)
     if limit == 0:
         logging.info(
             f"All Items Requested for Search - Search ID: {search_id}")
         limit = 1000
-    items = await read_craigslist_items_by_search_id(search_id, conn, limit=limit)
+    items = await read_models(ctx.db_conn_pool, CraigslistItem, read_craigslist_items_by_search_id, [search_id])
 
     if not DISCORD_NEW_ITEM_HEADER_ROW:
         logging.error(f"Format Item for Message - Header Row is None")
@@ -92,10 +92,14 @@ async def new_dealify_items(ctx, search_id: int = None, limit: int = 10):
     disconnect_dealify_db(conn)
 
 
-async def run_test():
-    conn = await connect_dealify_db(DEALIFY_DB_CREDS)
+def run_test():
+    loop = asyncio.get_event_loop()
+    pool = loop.run_until_complete(start_pool(DEALIFY_DB_CREDS))
+    bot = commands.Bot(command_prefix='$')
+    bot.db_conn_pool = pool
+    bot.add_command(new_dealify_items)
     bot.run(DISCORD_TOKEN)
 
 
 if __name__ == "__main__":
-    bot.run(DISCORD_TOKEN)
+    run_test()

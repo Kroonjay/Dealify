@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, parse_raw_as
 from datetime import datetime
 from enum import Enum, IntEnum
 from typing import List, Dict, Set
@@ -42,8 +42,8 @@ class DealifySearchTaskTypes(IntEnum):
 
 class PriceRestrictionTypes(IntEnum):
     Unrestricted = 0
-    MaxPrice = 1
-    DiscountOnly = 2
+    DiscountAny = 1
+    DiscountFivePercent = 2
 
 
 class RestrictionTypes(IntEnum):
@@ -83,9 +83,9 @@ class DealifyWorkerStatus(IntEnum):
 
 class DealifyItemBase(BaseModel):
     item_name: str = None  # Friendly Name
-    price: int  # Item Price
-    search_id: int  # ID of Dealify Search that Discovered Item
-    source_url: str  # Direct link to item listing
+    price: int = None  # Item Price
+    search_id: int = None  # ID of Dealify Search that Discovered Item
+    source_url: str = None  # Direct link to item listing
 
 
 class DealifyItem(DealifyItemBase):
@@ -145,9 +145,28 @@ class CraigslistItem(DealifyItem):
     item_location: str = None  # Additional location field, unreliable for location data
 
 
+class NewCraigslistItem(BaseModel):
+    item_id: str = None  # Craigslist Item ID for listing
+    item_name: str = None  # When Item was listed on CL
+    price: int = None  # If item has been deleted from CL
+    search_id: int = None  # Does the post have images
+    source_url: str = None  # When listing was last updated on CL
+    # Whether or not this was reposted, if not null will be...
+    tags: List[str] = None
+    created_at: datetime = None  # Additional location field, unreliable for location data
+    last_seen_at: datetime = None
+    source_id: int = None
+    posted_at: datetime = None
+    is_deleted: bool = None
+    has_image: bool = None
+    last_updated: datetime = None
+    repost_of: str = None
+    item_location: str = None
+
+
 class CraigslistConfig(BaseModel):
-    queries: List[str]  # List of queries to search on Craigslist
-    categories: List[str]  # List of Craigslist Category Codes to Search
+    queries: List[str] = None  # List of queries to search on Craigslist
+    categories: List[str] = None  # List of Craigslist Category Codes to Search
     interval_mins: int = 1440
     search_titles: bool = False
     require_image: bool = False
@@ -162,25 +181,46 @@ class SearchConfigIn(BaseModel):
 
 
 class SearchConfig(SearchConfigIn):
-    location_restriction_config: LocationRestrictionConfig = None
-    price_restriction_config: PriceRestrictionConfig = None
     craigslist_config: CraigslistConfig = None
+    price_restriction_config: PriceRestrictionConfig = None
+    location_restriction_config: LocationRestrictionConfig = None
+
+    @validator('craigslist_config', pre=True)
+    def build_craigslist_config(cls, v):
+        return CraigslistConfig.parse_raw(v)
+
+    @validator('price_restriction_config', pre=True)
+    def build_price_restriction_config(cls, v):
+        return PriceRestrictionConfig.parse_raw(v)
+
+    @validator('location_restriction_config', pre=True)
+    def build_location_restriction_config(cls, v):
+        return LocationRestrictionConfig.parse_raw(v)
 
 
 class DealifySearchIn(BaseModel):
-    search_name: str = None  # Friendly Name
+
     # JSON Stringify'd list of DealifySourceEnum's to Search
     sources: str = None
     # JSON Stringify'd SearchConfig object, contains config objects for all services searched, can also set max price & distance
     search_config: str = None  # JSON Stringify'd SearchConfig Model
 
 
-class DealifySearch(DealifySearchIn):
+class DealifySearch(BaseModel):
     search_id: int = None  # Database ID
     search_status: int = None
+    search_name: str = None  # Friendly Name
     sources: List[int] = None  # List of DealifySourceEnum's to Search
-    created_at: datetime = None  # When Search was created
     search_config: SearchConfig = None
+    created_at: datetime = None  # When Search was created
+
+    @validator('sources', pre=True)
+    def build_sources_list(cls, v):
+        return parse_raw_as(List[int], v)
+
+    @validator('search_config', pre=True)
+    def build_search_config(cls, v):
+        return SearchConfig.parse_raw(v)
 
 
 class CraigslistQueryIn(BaseModel):
@@ -260,3 +300,7 @@ class DealifyWorker(DealifyWorkerIn):
     task_config: DealifyWorkerTaskConfig = None
     created_at: datetime = None
     started_at: datetime = None
+
+    @validator('task_config', pre=True)
+    def build_task_config(cls, v):
+        return parse_raw_as(DealifyWorkerTaskConfig, v)

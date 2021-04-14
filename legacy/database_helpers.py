@@ -89,6 +89,40 @@ def row_to_craigslist_item(row):
     return cl_item
 
 
+@asyncio.coroutine
+def start_pool(dealify_db_creds: dict):
+    if not dealify_db_creds["password"]:
+        logging.critical("ERROR - Dealify Database Password is Unset!")
+        return None
+    pool = yield from aiomysql.create_pool(**dealify_db_creds)
+    logging.info("Successfully Started Connection Pool!")
+    return pool
+
+
+@asyncio.coroutine
+def run_sproc(pool, sproc: str, params: list = None):
+    if not pool:
+        logging.error(
+            f'Failed to Run Stored Procedure - Connection Pool is None')
+        return None
+    rows = None
+    with (yield from pool) as conn:
+        cur = yield from conn.cursor()
+        if params:
+            yield from cur.callproc(sproc, params)
+        else:
+            yield from cur.callproc(sproc)
+        try:
+            rows = yield from cur.fetchall()
+
+        except ValueError as vale:
+            logging.error(
+                f"Run Stored Procedure - Value Error - No Response Rows - Sproc: {sproc} - Params: {params}")
+    logging.info(
+        f"Run Stored Procedure - Finished - Sproc: {sproc} - Response Rows: {0 if rows is None else len(rows)}")
+    return rows
+
+
 async def connect_dealify_db(dealify_db_creds):
     if not dealify_db_creds["password"]:
         logging.critical("ERROR - Dealify Database Password is Unset!")

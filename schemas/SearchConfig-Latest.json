@@ -1,0 +1,92 @@
+{
+    "title": "SearchConfig",
+    "type": "object",
+    "properties": {
+        "location_restriction_config": {
+            "$ref": "#/definitions/LocationRestrictionConfig"
+        },
+        "price_restriction_config": {
+            "$ref": "#/definitions/PriceRestrictionConfig"
+        },
+        "craigslist_config": {
+            "$ref": "#/definitions/CraigslistConfig"
+        }
+    },
+    "definitions": {
+        "LocationRestrictionConfig": {
+            "title": "LocationRestrictionConfig",
+            "type": "object",
+            "properties": {
+                "restriction_type": {
+                    "title": "Restriction Type",
+                    "default": 2,
+                    "type": "integer"
+                },
+                "source_zip": {
+                    "title": "Source Zip",
+                    "default": 98105,
+                    "type": "integer"
+                },
+                "max_distance": {
+                    "title": "Max Distance",
+                    "default": 0,
+                    "type": "integer"
+                }
+            }
+        },
+        "PriceRestrictionConfig": {
+            "title": "PriceRestrictionConfig",
+            "type": "object",
+            "properties": {
+                "restriction_type": {
+                    "title": "Restriction Type",
+                    "default": 0,
+                    "type": "integer"
+                },
+                "max_price": {
+                    "title": "Max Price",
+                    "type": "integer"
+                }
+            }
+        },
+        "CraigslistConfig": {
+            "title": "CraigslistConfig",
+            "type": "object",
+            "properties": {
+                "queries": {
+                    "title": "Queries",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "categories": {
+                    "title": "Categories",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "interval_mins": {
+                    "title": "Interval Mins",
+                    "default": 1440,
+                    "type": "integer"
+                },
+                "search_titles": {
+                    "title": "Search Titles",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "require_image": {
+                    "title": "Require Image",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "queries",
+                "categories"
+            ]
+        }
+    }
+}
