@@ -12,34 +12,21 @@ from core.configs.config import DEALIFY_DB_CREDS
 from core.enums.statuses import DealifyWorkerStatus
 from core.models.dealify.dealify_worker import DealifyWorkerModel
 from core.models.dealify.dealify_task import DealifyTask
+from worker.config import WORKER_ID, WORKER_LOG_LEVEL, WORKER_LOG_FILE, WORKER_LOG_FORMAT, BASE_LOGGER_NAME
 
 
-WORKER_LOG_FILE = 'worker.log'
-WORKER_ID = 2
-WORKER_LOG_LEVEL = logging.INFO
-WORKER_LOG_FILE = "worker.log"
-
-
-BASE_LOGGER_NAME = "DealifySearchWorker"
-
-DEV_MODE = True
-
-WORKER_LOG_FORMAT = "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"
-
-
-def start_logger(log_level=WORKER_LOG_LEVEL, dev=DEV_MODE):
+def start_logger(log_level=WORKER_LOG_LEVEL):
     logging.basicConfig(level=log_level,
                         filename=WORKER_LOG_FILE,
                         filemode='w')
     root_logger = logging.getLogger()
     fh = logging.FileHandler(WORKER_LOG_FILE)
     root_logger.addHandler(fh)
-    if dev:
-        ch = logging.StreamHandler()
-        ch.setLevel(log_level)
-        formatter = logging.Formatter(WORKER_LOG_FORMAT)
-        ch.setFormatter(formatter)
-        root_logger.addHandler(ch)
+    ch = logging.StreamHandler()
+    ch.setLevel(log_level)
+    formatter = logging.Formatter(WORKER_LOG_FORMAT)
+    ch.setFormatter(formatter)
+    root_logger.addHandler(ch)
     base_logger = logging.getLogger(BASE_LOGGER_NAME)
     return base_logger
 
@@ -48,7 +35,7 @@ class DealifyWorker:
 
     def __init__(self):
         self.logger = start_logger()
-        self.worker_id = 2
+        self.worker_id = getenv()
         if not self.worker_id:
             logging.critical("Can't Initialize Worker - Worker ID is None")
         self.db_creds = DEALIFY_DB_CREDS
@@ -257,4 +244,4 @@ class DealifyWorker:
 
 if __name__ == '__main__':
     dw = DealifyWorker()
-    dw.work()
+    dw.run()

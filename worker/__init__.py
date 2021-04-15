@@ -1,1 +1,1 @@
-from . import dealify_worker
+from . import dealify_worker, config

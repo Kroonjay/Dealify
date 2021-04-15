@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "./dealify_worker.py"]
+CMD ["python", "./worker/dealify_worker.py"]
