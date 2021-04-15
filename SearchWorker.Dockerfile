@@ -6,10 +6,12 @@ ENV DEALIFY_DB_PASSWORD="None"
 
 ENV DEV_MODE_ENABLED="False"
 
+COPY ./worker/dealify_worker.py ./
+
 COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "./worker/dealify_worker.py"]
+CMD ["python", "./dealify_worker.py"]
