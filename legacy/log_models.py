@@ -23,5 +23,13 @@ class DealifySearchWorkerLogs(BaseModel):
     log_enum_update_finished: str = "{enum_name} Update Finished - Successfully Updated to New Value: {new_value} from Old Value: {old_value}"
 
 
+class ErrorLogs(BaseModel):
+    required_value_is_none: str = 'Operation Failed - Required Value is None - Value: {value}'
+    enum_option_unsupported: str = 'Unsupported Option for Enum - Enum: {enum} - Option: {option}'
+    model_validation_failed: str = 'Model Validation Failed - Model: {model} - Input Data: {data} - Error Msg: {error}'
+    database_not_connected: str = 'Unable to Connect to Database'
+    query_no_return_values: str = 'Query Expected Return Rows but Received None - Query: {query} - Params: {params}'
+
+
 class DealifyLogs(BaseModel):
     search_worker: DealifySearchWorkerLogs = DealifySearchWorkerLogs()

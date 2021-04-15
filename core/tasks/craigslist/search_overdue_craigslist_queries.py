@@ -29,12 +29,14 @@ async def run_task_search_overdue_craigslist_queries(pool, config: CraigslistOve
             f"Started Craigslist Query with ID: {cl_query.query_id} - Data: {cl_query.json()}")
         try:
             num_items = await query_craigslist_items(cl_query, pool)
-            await run_sproc(pool, update_craigslist_query_status_sproc, [cl_query.query_id, DealifySearchStatus.Dormant.value])
+            success = True
+
         except ConnectionError as ce:
             retries += 1
             sleep_for = config.rate_limit_sleep_seconds
             logging.error(
                 f"ConnectionError - Sleeping for {sleep_for}s before Retrying - Data: {ce}")
+            success = False
             await run_sproc(pool, update_craigslist_query_status_sproc, [cl_query.query_id, DealifySearchStatus.Overdue.value])
             await asyncio.sleep(sleep_for)
         except ConnectionResetError as cre:
@@ -42,8 +44,14 @@ async def run_task_search_overdue_craigslist_queries(pool, config: CraigslistOve
             sleep_for = config.rate_limit_sleep_seconds
             logging.error(
                 f"ConnectionResetError - Sleeping for {sleep_for}s before Retrying - Data: {cre}")
-            await run_sproc(pool, update_craigslist_query_status_sproc, [cl_query.query_id, DealifySearchStatus.Overdue.value])
+            success = False
             await asyncio.sleep(sleep_for)
+        if success:
+            new_status = DealifySearchStatus.Dormant.value
+        else:
+            new_status = DealifySearchStatus.Overdue.value
+
+        await run_sproc(pool, update_craigslist_query_status_sproc, [cl_query.query_id, new_status])
         finished_at = perf_counter()
         sleep_for = randint(config.query_sleep_seconds_min,
                             config.query_sleep_seconds_max)
