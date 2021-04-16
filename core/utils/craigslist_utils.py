@@ -215,7 +215,7 @@ async def query_unrestricted_sites(pool, location_restriction_config):
                 f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {location_restriction_config.source_zip}")
 
         else:
-            cl_sites = await read_models(pool, read_craigslist_sites_by_state_sproc, [source_loc.state])
+            cl_sites = await read_models(pool, CraigslistSite, read_craigslist_sites_by_state_sproc, [source_loc.state])
             logging.debug(
                 f"Query Unrestricted Sites - Successfully Retrieved Sites for HomeState Search - Sites: {cl_sites}")
 

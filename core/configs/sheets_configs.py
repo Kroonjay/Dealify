@@ -1,4 +1,4 @@
-
+from core.configs.config import DEV_MODE
 
 SPREADSHEET_ID = '12G-EDF2dxhcNKkUHTExqJFJmwQTTs_My1h79GPURR9g'
 
@@ -8,7 +8,11 @@ NEW_SEARCH_DATA_RANGE = 'NewSearches!A2:L'
 
 API_SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
-SERVICE_ACCOUNT_CREDS_FILE = 'sheets.creds.json'
+
+if DEV_MODE:
+    SERVICE_ACCOUNT_CREDS_FILE = 'sheets.creds.json'
+else:
+    SERVICE_ACCOUNT_CREDS_FILE = './sheets.creds.json'
 
 BOOLEAN_STRING_TRUE_VALUE = 'Yes'
 
