@@ -23,4 +23,4 @@ SCHEMA_ACTIVE_FILE_EXTENSION = '-Latest.json'
 
 DEALIFY_NOMINATIM_USER_AGENT = 'dealify'
 
-DEV_MODE = os.getenv("DEV_MODE")
+DEV_MODE = getenv("DEV_MODE")
