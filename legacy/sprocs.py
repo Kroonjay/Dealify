@@ -7,9 +7,9 @@ create_craigslist_item_sproc = "CreateCraigslistItem"
 create_craigslist_site_sproc = "CreateCraigslistSite"
 read_craigslist_subdomain_by_site_id_sproc = "ReadCraigslistSubdomainBySiteId"
 # Values: @country_param
-read_craigslist_site_ids_by_country_sproc = "ReadCraigslistSiteIdsByCountry"
+read_craigslist_sites_by_country_sproc = "ReadCraigslistSiteIdsByCountry"
 
-read_craigslist_site_ids_by_state_sproc = "ReadCraigslistSiteIdsByState"
+read_craigslist_sites_by_state_sproc = "ReadCraigslistSiteIdsByState"
 
 # Values: @search_id_param
 read_dealify_search_by_id_sproc = "ReadDealifySearchById"
@@ -49,7 +49,3 @@ update_dealify_current_task_by_id_sproc = "UpdateDealifyCurrentTaskById"
 set_deleted_craigslist_item_sproc = "SetDeletedCraigslistItem"
 # Values: @interval_days_param, @limit_param
 read_old_craigslist_item_ids_sproc = "ReadOldActiveCraigslistItems"
-# Values: @status_param, @limit_param
-read_craigslist_queries_by_status_sproc = "ReadCraigslistQueriesByStatus"
-# Values: @query_id_param, @new_status_param
-update_craigslist_query_status_sproc = "UpdateCraigslistQueryStatus"

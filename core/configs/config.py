@@ -20,3 +20,5 @@ MODEL_REFERENCE_PATH = '#/definitions/'
 
 SCHEMA_PATH = 'schemas/'
 SCHEMA_ACTIVE_FILE_EXTENSION = '-Latest.json'
+
+DEALIFY_NOMINATIM_USER_AGENT = 'dealify'

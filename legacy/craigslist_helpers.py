@@ -210,37 +210,40 @@ async def query_craigslist_items(cl_query, conn):
     return
 
 
-async def query_unrestricted_sites(dealify_search, conn):
+async def query_unrestricted_sites(location_restriction_config, conn):
     cl_sites = None
-    if dealify_search.search_config.location_restriction_config:
-        source_loc = query_location(
-            dealify_search.search_config.location_restriction_config.source_zip)
-        if dealify_search.search_config.location_restriction_config.restriction_type == LocationRestrictionTypes.UnitedStatesOnly.value:
-            logging.debug("Location Restricted to US Only")
-            cl_sites = await read_craigslist_site_ids_by_country(
-                'United States', conn)
-            return cl_sites
-        elif dealify_search.search_config.location_restriction_config.restriction_type == LocationRestrictionTypes.HomeState.value:
-            if not source_loc:
-                logging.error(
-                    f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {dealify_search.search_config.location_restriction_config.source_zip}")
-                return cl_sites
-            cl_sites = await read_craigslist_site_ids_by_state(source_loc.state, conn)
-            logging.debug(
-                f"Query Unrestricted Sites - Successfully Retrieved Sites for HomeState Search - Sites: {cl_sites}")
-            return cl_sites
-        elif dealify_search.search_config.location_restriction_config.restriction_type == LocationRestrictionTypes.HomeCity.value:
-            logging.debug(
-                f"Query Unrestricted Sites - Location Restricted to HomeCity Only - Search ID: {dealify_search.search_id}")
-            if not source_loc:
-                logging.error(
-                    f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {dealify_search.search_config.location_restriction_config.source_zip}")
-                return cl_sites
-            cl_sites = await read_craigslist_site_ids_by_city(source_loc.city, conn)
-        else:
-            logging.error(
-                f"Location Restriction Unsupported! - Option: {dealify_search.search_config.location_restriction_config.restriction_type}")
+    if not location_restriction_config:
+        logging.error(
+            f"Failed to Query Craigslist Sites - LocationRestrictionConfig Not Provided")
+        return None
+    source_loc = query_location(
+        location_restriction_config.source_zip)
+    if location_restriction_config.restriction_type == LocationRestrictionTypes.UnitedStatesOnly.value:
+        logging.debug("Location Restricted to US Only")
+        cl_sites = await read_craigslist_site_ids_by_country(
+            'United States', conn)
         return cl_sites
+    elif location_restriction_config.restriction_type == LocationRestrictionTypes.HomeState.value:
+        if not source_loc:
+            logging.error(
+                f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {location_restriction_config.source_zip}")
+            return cl_sites
+        cl_sites = await read_craigslist_site_ids_by_state(source_loc.state, conn)
+        logging.debug(
+            f"Query Unrestricted Sites - Successfully Retrieved Sites for HomeState Search - Sites: {cl_sites}")
+        return cl_sites
+    elif location_restriction_config.restriction_type == LocationRestrictionTypes.HomeCity.value:
+        logging.debug(
+            f"Query Unrestricted Sites - Location Restricted to HomeCity Only - LRC Data: {lrc.json()}")
+        if not source_loc:
+            logging.error(
+                f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {location_restriction_config.source_zip}")
+            return cl_sites
+        cl_sites = await read_craigslist_site_ids_by_city(source_loc.city, conn)
+    else:
+        logging.error(
+            f"Location Restriction Unsupported! - Option: {location_restriction_config.restriction_type}")
+    return cl_sites
     else:
         logging.critical("Unrestricted Search Requested - Watch Out!")
         return cl_sites

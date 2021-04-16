@@ -53,7 +53,7 @@ class RestrictionTypes(IntEnum):
 
 
 class LocationRestrictionConfig(BaseModel):
-    restriction_type: int = LocationRestrictionTypes.UnitedStatesOnly.value
+    restriction_type: int = LocationRestrictionTypes.UnitedStates.value
     source_zip: int = 98105
     max_distance: int = 0
 

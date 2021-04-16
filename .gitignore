@@ -6,6 +6,7 @@ __pycache__/
 # Dealify Exclusions
 *.log
 *.sandbox.py
+*.creds.json
 
 # C extensions
 *.so

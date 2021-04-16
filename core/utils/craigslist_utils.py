@@ -4,14 +4,75 @@ import logging
 import re
 
 from bs4 import BeautifulSoup
+from pydantic import BaseModel, ValidationError
 from craigslist import CraigslistForSale
 import requests
 
-from core.database.db_helpers import run_sproc, read_model, values_from_model
+from core.database.db_helpers import run_sproc, read_model, values_from_model, read_models
 from core.models.craigslist.craigslist_query import CraigslistQueryExecDetails
 from core.models.craigslist.craigslist_site import CraigslistSite
 from core.models.craigslist.craigslist_item import CraigslistItemIn
-from core.database.sprocs import read_craigslist_site_by_id_sproc, create_craigslist_item_sproc
+from core.models.craigslist.craigslist_site import CraigslistSite
+from core.database.sprocs import read_craigslist_site_by_id_sproc, create_craigslist_item_sproc, read_craigslist_sites_by_city_sproc, read_craigslist_sites_by_country_sproc, read_craigslist_sites_by_state_sproc
+from core.utils.location_utils import query_location
+from core.enums.restriction_types import LocationRestrictionTypes
+
+craigslist_category_map = {
+    'Antiques': 'ata',
+    'Appliances': 'ppa',
+    'Arts & Crafts': 'ara',
+    "ATV/UTV/Snomobile": 'sna',
+    'Auto Parts': 'pta',
+    'Aviation': 'ava',
+    'Baby & Kid Stuff': 'baa',
+    'Barter': 'bar',
+    'Beauty & Health': 'haa',
+    'Bike Parts': 'bip',
+    'Bikes': 'bia',
+    'Boat Parts': 'bpa',
+    'Boats': 'boo',
+    'Books': 'bka',
+    'Business': 'bfa',
+    'Cars & Trucks': 'cta',
+    'CD/DVD/VHS': 'ema',
+    'Cell Phones': 'moa',
+    'Clothes & Accessories': 'cla',
+    'Collectibles': 'cba',
+    'Computer Parts': 'syp',
+    'Computers': 'sya',
+    'Electronics': 'ela',
+    'Farm & Garden': 'gra',
+    'Free Stuff': 'zip',
+    'Furniture': 'fua',
+    'Garage Sale': 'gms',
+    'General': 'foa',
+    'Heavy Equipment': 'hva',
+    'Household Stuff': 'hsa',
+    'Jewelery': 'jwa',
+    'Materials': 'maa',
+    'Motorcycle Parts': 'mpa',
+    'Motorcycles': 'mca',
+    'Musical Instruments': 'msa',
+    'Photo & Video Stuff': 'pha',
+    "RV's & Camping Gear": 'rva',
+    'Sporting Goods': 'sga',
+    'Tickets': 'tia',
+    'Tools': 'tla',
+    'Toys & Games': 'taa',
+    'Trailers': 'tra',
+    'Video Games': 'vga',
+    'Wanted': 'waa',
+    'Wheels & Tires': 'wta'
+}
+
+
+def map_craigslist_category(category_name: str):
+    if not category_name in craigslist_category_map.keys():
+        logging.error(
+            f"Invalid Craigslist Category - No Value Found for Category Name: {category_name}")
+        return None
+    else:
+        return craigslist_category_map[category_name]
 
 
 def parse_price(source_price):
@@ -135,3 +196,38 @@ async def query_craigslist_items(cl_query, pool):
     logging.info(
         f"Finished Query Craigslist Items - Found {cl_items} Items for Query {cl_query.query_id}")
     return cl_items
+
+
+async def query_unrestricted_sites(pool, location_restriction_config):
+    cl_sites = None
+    if not location_restriction_config:
+        logging.error(
+            f"Failed to Query Craigslist Sites - LocationRestrictionConfig Not Provided")
+        return None
+    source_loc = query_location(
+        location_restriction_config.source_zip)
+    if location_restriction_config.restriction_type == LocationRestrictionTypes.UnitedStates.value:
+        logging.debug("Location Restricted to US Only")
+        cl_sites = await read_models(pool, CraigslistSite, read_craigslist_sites_by_country_sproc, ['United States'])
+    elif location_restriction_config.restriction_type == LocationRestrictionTypes.HomeState.value:
+        if not source_loc:
+            logging.error(
+                f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {location_restriction_config.source_zip}")
+
+        else:
+            cl_sites = await read_models(pool, read_craigslist_sites_by_state_sproc, [source_loc.state])
+            logging.debug(
+                f"Query Unrestricted Sites - Successfully Retrieved Sites for HomeState Search - Sites: {cl_sites}")
+
+    elif location_restriction_config.restriction_type == LocationRestrictionTypes.HomeCity.value:
+        logging.debug(
+            f"Query Unrestricted Sites - Location Restricted to HomeCity Only - LRC Data: {location_restriction_config.json()}")
+        if not source_loc:
+            logging.error(
+                f"Unable to Query Unrestricted Sites - Location Not Found or Invalid - Source ZIP Code: {location_restriction_config.source_zip}")
+        else:
+            cl_sites = await read_models(pool, CraigslistSite, read_craigslist_sites_by_city_sproc, [source_loc.city])
+    else:
+        logging.error(
+            f"Location Restriction Unsupported! - Option: {location_restriction_config.restriction_type}")
+    return cl_sites

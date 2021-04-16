@@ -4,14 +4,14 @@ from core.enums.restriction_types import LocationRestrictionTypes, PriceRestrict
 
 
 class LocationRestrictionConfig(BaseModel):
-    restriction_type: int = LocationRestrictionTypes.UnitedStatesOnly.value
+    restriction_type: int = LocationRestrictionTypes.HomeCity.value
     source_zip: int = 98105
     max_distance: int = 0
 
 
 class PriceRestrictionConfig(BaseModel):
     restriction_type: int = PriceRestrictionTypes.Unrestricted.value
-    max_price: int = None
+    standard_price: int = 1
 
 
 class SearchConfigIn(BaseModel):
@@ -29,12 +29,12 @@ class SearchConfig(SearchConfigIn):
 
     @validator('craigslist_config', pre=True)
     def build_craigslist_config(cls, v):
-        return CraigslistConfig.parse_raw(v)
+        return CraigslistConfig.parse_raw(v) if isinstance(v, str) else None
 
     @validator('price_restriction_config', pre=True)
     def build_price_restriction_config(cls, v):
-        return PriceRestrictionConfig.parse_raw(v)
+        return PriceRestrictionConfig.parse_raw(v) if isinstance(v, str) else None
 
     @validator('location_restriction_config', pre=True)
     def build_location_restriction_config(cls, v):
-        return LocationRestrictionConfig.parse_raw(v)
+        return LocationRestrictionConfig.parse_raw(v) if isinstance(v, str) else None

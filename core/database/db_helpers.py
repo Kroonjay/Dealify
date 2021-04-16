@@ -1,5 +1,6 @@
 import asyncio
 import aiomysql
+import pymysql
 from pydantic import BaseModel, parse_obj_as, ValidationError
 import logging
 
@@ -62,16 +63,18 @@ def run_sproc(pool, sproc: str, params: list = None):
     rows = None
     with (yield from pool) as conn:
         cur = yield from conn.cursor()
-        if params:
-            yield from cur.callproc(sproc, params)
-        else:
-            yield from cur.callproc(sproc)
         try:
+            if params:
+                yield from cur.callproc(sproc, params)
+            else:
+                yield from cur.callproc(sproc)
             rows = yield from cur.fetchall()
-
         except ValueError as vale:
             logging.error(
                 f"Run Stored Procedure - Value Error - No Response Rows - Sproc: {sproc} - Params: {params}")
+        except pymysql.err.IntegrityError as ie:
+            logging.info(
+                f"Duplicate Key Error for Stored Procedure - Row Not Created - Sproc: {sproc} - Params: {params}")
     logging.debug(
         f"Run Stored Procedure - Finished - Sproc: {sproc} - Response Rows: {0 if rows is None else len(rows)}")
     return rows

@@ -25,10 +25,17 @@ class DealifySearchWorkerLogs(BaseModel):
 
 class ErrorLogs(BaseModel):
     required_value_is_none: str = 'Operation Failed - Required Value is None - Value: {value}'
+    required_value_invalid_type: str = 'Operation Failed - Required Value is Invalid Type - Received: {received} - Required: {required}'
     enum_option_unsupported: str = 'Unsupported Option for Enum - Enum: {enum} - Option: {option}'
     model_validation_failed: str = 'Model Validation Failed - Model: {model} - Input Data: {data} - Error Msg: {error}'
     database_not_connected: str = 'Unable to Connect to Database'
     query_no_return_values: str = 'Query Expected Return Rows but Received None - Query: {query} - Params: {params}'
+    worker_no_task_types: str = 'Worker Started but has No Task Types - Worker ID: {worker_id}'
+    worker_no_task_ids: str = 'Worker Found No Task IDs for All Task Types - Worker ID: {worker_id} - Task Types: {task_types}'
+
+
+class InfoLogs(BaseModel):
+    database_connected: str = 'Successfully Connected to Dealify Database'
 
 
 class DealifyLogs(BaseModel):

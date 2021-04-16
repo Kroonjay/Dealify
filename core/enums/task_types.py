@@ -7,5 +7,6 @@ class DealifyTaskTypes(IntEnum):
     CraigslistSites = 2  # Refresh Craigslist Sites & Location Data
     # Update query_status to 2 based on last_execution_at time
     CraigslistSetOverdueQueries = 3
-    BuildQueriesForNewDealifySearches = 4
+    CraigslistQueriesForNewDealifySearches = 4
     CraigslistSearchOldDeletedItems = 5
+    SheetsCreateNewSearches = 6
