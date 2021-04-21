@@ -41,6 +41,7 @@ async def run_task_create_new_dealify_searches_from_sheets(pool):
             except ValidationError as ve:
                 logging.error(
                     f"Failed to Validate NewSearchSheetsRow - Data: {ve.json()}")
+                continue
             dsi = dealify_search_from_sheet_row(nssr)
             if not dsi:
                 logging.error(

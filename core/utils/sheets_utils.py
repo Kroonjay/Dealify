@@ -17,7 +17,7 @@ def dealify_search_from_sheet_row(nssr: NewSearchSheetRow):
         sci.location_restriction_config = lrc.json()
     except ValidationError as ve:
         logging.error(
-            f"Failed to Validate LocationRestrictionConfig - Using Default")
+            f"Failed to Validate LocationRestrictionConfig - Using Default - Data: {ve.json()}")
         sci.location_restriction_config = LocationRestrictionConfig().json()
     try:
         prc = PriceRestrictionConfig(
@@ -25,7 +25,7 @@ def dealify_search_from_sheet_row(nssr: NewSearchSheetRow):
         sci.price_restriction_config = prc.json()
     except ValidationError as ve:
         logging.error(
-            f"Failed to Validate PriceRestrictionConfig - Using Default")
+            f"Failed to Validate PriceRestrictionConfig - Using Default - Data: {ve.json()}")
         sci.price_restriction_config = PriceRestrictionConfig().json()
     if nssr.search_craigslist:
         try:
@@ -53,3 +53,11 @@ def dealify_search_from_sheet_row(nssr: NewSearchSheetRow):
     except ValidationError as ve:
         print(f"Failed to Validate Dealify Search - Data: {ve.json()}")
         return None
+
+
+def new_spreadsheet_body_base(dealify_search):
+    return {
+        'properties': {
+            'title': f"Dealify Items for Search: {dealify_search.search_name}"
+        }
+    }

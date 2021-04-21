@@ -67,3 +67,5 @@ read_dealify_search_by_name_sproc = "ReadDealifySearchByName"
 read_dealify_searches_by_status_sproc = "ReadDealifySearchesByStatus"
 # Values: @search_id_param, @new_status_param
 update_dealify_search_status_sproc = "UpdateDealifySearchStatus"
+# Values: @search_id_param, @new_config_param
+update_dealify_search_config_sproc = "UpdateDealifySearchConfig"

@@ -10,3 +10,4 @@ class DealifyTaskTypes(IntEnum):
     CraigslistQueriesForNewDealifySearches = 4
     CraigslistSearchOldDeletedItems = 5
     SheetsCreateNewSearches = 6
+    SheetsUpdateSearchResults = 7

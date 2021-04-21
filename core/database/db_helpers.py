@@ -7,7 +7,7 @@ import logging
 
 def values_from_model(model):
     try:
-        return tuple(model.dict().values())
+        return list(model.dict().values())
     except Exception as e:
         logging.error(
             f"Failed to Read Values From Model - Model: {model} - Data: {e}")

@@ -39,6 +39,8 @@ class NewSearchSheetRow(BaseModel):
 
     @validator('price_restriction_type', pre=True)
     def parse_price_restriction_type(cls, v):
+        if not v:
+            return PriceRestrictionTypes.Unrestricted.value
         stripped = v.replace(" ", "")
         return PriceRestrictionTypes[stripped] if stripped in PriceRestrictionTypes.__members__ else PriceRestrictionTypes.Unrestricted.value
 

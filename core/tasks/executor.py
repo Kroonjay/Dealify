@@ -7,14 +7,14 @@ def validate_task_config(task):
 
     task_config_base = map_task_config(task.task_type)
     if not task_config_base:
-        logging.error("NO task Config Base")
+        logging.debug(f"No task Config Base - Task: {task}")
         return None
     if not task.task_config:
-        logging.info("No Custom Task Config Specified, Using Default")
+        logging.debug("No Custom Task Config Specified, Using Default")
         return task_config_base()  # If no custom task_config specified with task, use Default
     try:
         task_config = parse_raw_as(task_config_base, task.task_config)
-        logging.info(f"Task Config Validated Successfully")
+        logging.debug(f"Task Config Validated Successfully")
         return task_config
     except ValidationError as ve:
         logging.error(f"Task Config Validation Failed - Data: {ve.json()}")

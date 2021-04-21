@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from datetime import datetime
 from typing import List
 
@@ -34,3 +34,19 @@ class CraigslistItem(BaseModel):
     last_updated: datetime = None
     repost_of: str = None
     item_location: str = None
+
+    @validator('created_at')
+    def created_at_to_str(cls, v: datetime):
+        return v.isoformat() if v else None
+
+    @validator('last_seen_at')
+    def last_seen_at_to_str(cls, v: datetime):
+        return v.isoformat() if v else None
+
+    @validator('posted_at')
+    def posted_at_to_str(cls, v: datetime):
+        return v.isoformat() if v else None
+
+    @validator('last_updated')
+    def last_updated_to_str(cls, v: datetime):
+        return v.isoformat() if v else None

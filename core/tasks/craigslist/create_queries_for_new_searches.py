@@ -44,6 +44,7 @@ async def create_craigslist_queries_for_dealify_search(pool, dealify_search):
                 try:
                     cl_query = CraigslistQueryIn(
                         search_id=dealify_search.search_id,
+                        category=category,
                         query=query,
                         site_id=site.site_id,
                         **dealify_search.search_config.craigslist_config.dict()
@@ -67,6 +68,9 @@ async def create_craigslist_queries_for_dealify_search(pool, dealify_search):
 async def run_task_create_craigslist_queries_for_new_searches(pool):
     new_searches = await read_models(pool, DealifySearch, read_dealify_searches_by_status_sproc, [
         DealifySearchStatus.New.value, 250])
+    if not new_searches:
+        logging.info(f"No New Searches Needing CraigslistQueries")
+        return
     tasks = []
     for search in new_searches:
         tasks.append(create_craigslist_queries_for_dealify_search(
