@@ -10,6 +10,7 @@ class CraigslistConfig(BaseModel):
     interval_mins: int = None
     search_titles: bool = False
     require_image: bool = False
+    # Ignore 0 Prices
 
     @validator('interval_mins', pre=True)
     def validate_search_interval_mins(cls, v):
