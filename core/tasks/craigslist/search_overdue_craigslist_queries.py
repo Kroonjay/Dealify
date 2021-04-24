@@ -7,7 +7,7 @@ from core.models.task_configs.craigslist import CraigslistOverdueQueriesTaskConf
 from core.models.craigslist.craigslist_query import CraigslistQuery
 from core.enums.statuses import DealifySearchStatus
 from core.database.db_helpers import run_sproc, read_model, read_models
-from core.database.sprocs import read_craigslist_queries_by_status_sproc, update_craigslist_query_status_sproc
+from core.database.sprocs import read_craigslist_queries_by_status_sproc, read_old_craigslist_queries_sproc, update_craigslist_query_status_sproc
 from core.utils.craigslist_utils import query_craigslist_items
 
 
@@ -16,13 +16,16 @@ async def run_task_search_overdue_craigslist_queries(pool, config: CraigslistOve
         config = CraigslistOverdueQueriesTaskConfig()
     retries = 0
     queries = 0
-    overdue_queries = await read_models(pool, CraigslistQuery, read_craigslist_queries_by_status_sproc, [DealifySearchStatus.Overdue.value, config.max_queries])
-    for cl_query in overdue_queries:
+    max_queries = 250
+    max_retries = 10
+    while retries < max_retries and queries < max_queries:
+        cl_query = await read_model(pool, CraigslistQuery, read_old_craigslist_queries_sproc, [DealifySearchStatus.Overdue.value, 1])
         started_at = perf_counter()
         num_items = 0
         await run_sproc(pool, update_craigslist_query_status_sproc, [cl_query.query_id, DealifySearchStatus.Running.value])
         logging.debug(
             f"Started Craigslist Query with ID: {cl_query.query_id} - Data: {cl_query.json()}")
+        queries += 1
         try:
             num_items = await query_craigslist_items(cl_query, pool)
             success = True

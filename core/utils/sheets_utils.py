@@ -10,7 +10,7 @@ from core.enums.sources import DealifySources
 
 def dealify_search_from_sheet_row(nssr: NewSearchSheetRow):
     sci = SearchConfigIn()
-    sources = []
+    sources = [DealifySources.GoogleSheets.value]
     try:
         lrc = LocationRestrictionConfig(
             restriction_type=nssr.location_restriction_type, source_zip=nssr.source_zip)
