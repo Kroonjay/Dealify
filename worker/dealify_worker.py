@@ -221,7 +221,12 @@ class DealifyWorker:
                 retries += 1
                 continue
             started_at = perf_counter()
-            success = await run_dealify_task(self.current_task, self.pool)
+            try:
+                success = await run_dealify_task(self.current_task, self.pool)
+            except Exception as e:
+                logging.critical(
+                    f"Found Uncaught Exception During Task - Task ID: {self.current_task.task_id} Data: {e}")
+                self.current_task = None
             if success:
                 finished_at = perf_counter()
                 self.logger.info(

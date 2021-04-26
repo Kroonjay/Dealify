@@ -75,6 +75,9 @@ def run_sproc(pool, sproc: str, params: list = None):
         except pymysql.err.IntegrityError as ie:
             logging.info(
                 f"Duplicate Key Error for Stored Procedure - Row Not Created - Sproc: {sproc} - Params: {params}")
+        except pymysql.err.DataError as de:
+            logging.error(
+                f"Value out of Range Error for Stored Procedure - Row Not Created - Sproc: {sproc} - Params: {params}")
     logging.debug(
         f"Run Stored Procedure - Finished - Sproc: {sproc} - Response Rows: {0 if rows is None else len(rows)}")
     return rows
