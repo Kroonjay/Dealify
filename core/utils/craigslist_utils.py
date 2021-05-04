@@ -2,11 +2,12 @@ import asyncio
 import aiohttp
 import logging
 import re
+import requests
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, ValidationError
 from craigslist import CraigslistForSale
-import requests
+
 
 from core.database.db_helpers import run_sproc, read_model, values_from_model, read_models
 from core.models.craigslist.craigslist_query import CraigslistQueryExecDetails
@@ -119,11 +120,11 @@ async def craigslist_item_is_deleted(cl_item):
         async with session.get(cl_item.source_url) as response:
             if not response.status == 200:
                 if response.status == 404:
-                    print(
+                    logging.debug(
                         f"Received 404 Response - Craigslist Item is Definitely Deleted")
                     return True
                 else:
-                    print(
+                    logging.error(
                         f"Received Unknown Response Code - Unsure if Item is Deleted or Error - Status: {response.status}")
                     return False
             else:
@@ -193,7 +194,7 @@ async def query_craigslist_items(cl_query, pool):
             f"ConnectionError While Querying Craigslist Items - We're Probably Being Rate-Limited - Data: {ce}")
         return cl_items
 
-    logging.info(
+    logging.debug(
         f"Finished Query Craigslist Items - Found {cl_items} Items for Query {cl_query.query_id}")
     return cl_items
 

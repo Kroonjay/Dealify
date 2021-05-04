@@ -71,3 +71,7 @@ update_dealify_search_status_sproc = "UpdateDealifySearchStatus"
 update_dealify_search_config_sproc = "UpdateDealifySearchConfig"
 # Values: @status_param, @limit_param
 read_old_craigslist_queries_sproc = "ReadOldestCraigslistQueries"
+# Values: @key_name_param, @config_value_param, @notes_param
+create_config_key_sproc = "CreateConfigKey"
+# Values: @key_name_param
+read_config_key_by_name_sproc = "ReadConfigKeyByName"

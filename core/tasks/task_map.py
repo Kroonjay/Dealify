@@ -19,8 +19,7 @@ task_map = {
     DealifyTaskTypes.SheetsUpdateSearchResults.value: run_task_update_dealify_search_results_sheets}
 
 task_config_map = {
-    DealifyTaskTypes.CraigslistSearchOverdueQueries.value: CraigslistOverdueQueriesTaskConfig,
-    DealifyTaskTypes.CraigslistSearchOldDeletedItems.value: CraigslistOldDeletedItemsTaskConfig}
+    DealifyTaskTypes.CraigslistSearchOverdueQueries.value: CraigslistOverdueQueriesTaskConfig}
 
 
 def map_task_config(task_type: int):

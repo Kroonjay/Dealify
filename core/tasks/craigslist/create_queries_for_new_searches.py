@@ -4,11 +4,13 @@ import logging
 from pydantic import ValidationError
 
 from core.utils.craigslist_utils import query_unrestricted_sites
+from core.utils.dealify_utils import read_config_key
 from core.database.db_helpers import read_models, run_sproc, values_from_model
 from core.models.dealify.dealify_search import DealifySearch
 from core.database.sprocs import read_dealify_searches_by_status_sproc, update_dealify_search_status_sproc, create_craigslist_query_sproc
 from core.enums.statuses import DealifySearchStatus
 from core.enums.sources import DealifySources
+from core.enums.config_keys import ConfigKeys
 from core.models.craigslist.craigslist_query import CraigslistQueryIn
 
 
@@ -66,8 +68,10 @@ async def create_craigslist_queries_for_dealify_search(pool, dealify_search):
 
 
 async def run_task_create_craigslist_queries_for_new_searches(pool):
+    max_queries_key = await read_config_key(pool, ConfigKeys.CRAIGSLIST_MAX_QUERIES_PER_TASK)
+    max_queries = max_queries_key.config_value
     new_searches = await read_models(pool, DealifySearch, read_dealify_searches_by_status_sproc, [
-        DealifySearchStatus.New.value, 250])
+        DealifySearchStatus.New.value, max_queries])
     if not new_searches:
         logging.info(f"No New Searches Needing CraigslistQueries")
         return

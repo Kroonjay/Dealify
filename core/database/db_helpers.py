@@ -73,7 +73,7 @@ def run_sproc(pool, sproc: str, params: list = None):
             logging.error(
                 f"Run Stored Procedure - Value Error - No Response Rows - Sproc: {sproc} - Params: {params}")
         except pymysql.err.IntegrityError as ie:
-            logging.info(
+            logging.error(
                 f"Duplicate Key Error for Stored Procedure - Row Not Created - Sproc: {sproc} - Params: {params}")
         except pymysql.err.DataError as de:
             logging.error(

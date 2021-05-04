@@ -204,6 +204,7 @@ class DealifyWorker:
         while retries < self.max_retries:
             await self._sync()
             await self._task()
+            success = False
             if not self.pool:
                 self.logger.critical(
                     f"Can't Run - Not Connected to Database - Attempt {retries} of {self.max_retries}")
@@ -227,6 +228,7 @@ class DealifyWorker:
                 logging.critical(
                     f"Found Uncaught Exception During Task - Task ID: {self.current_task.task_id} Data: {e}")
                 self.current_task = None
+
             if success:
                 finished_at = perf_counter()
                 self.logger.info(

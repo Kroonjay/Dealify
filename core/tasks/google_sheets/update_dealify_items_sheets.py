@@ -14,7 +14,8 @@ from core.utils.dealify_utils import update_dealify_search_config
 from core.configs.sheets_configs import SERVICE_ACCOUNT_CREDS_FILE, SEARCH_RESULTS_PAGE_NAMES, SEARCH_RESULTS_PAGE_DEFAULT_COLUMN_LENGTH, SEARCH_RESULTS_PAGE_DEFAULT_ROW_LENGTH
 from core.models.craigslist.craigslist_item import CraigslistItem
 from core.models.google_sheets.sheets_config import SheetsConfig
-
+from core.utils.dealify_utils import read_config_key
+from core.enums.config_keys import ConfigKeys
 test_header_fmt = cellFormat(
     backgroundColor=color.fromHex('#b7b7b7'),
     textFormat=textFormat(
@@ -24,17 +25,21 @@ test_header_fmt = cellFormat(
 
 
 async def run_task_update_dealify_search_results_sheets(pool):
-
-    try:
-        svc_acc = gspread.service_account(filename=SERVICE_ACCOUNT_CREDS_FILE)
-        print("Loaded Service Account")
-    except FileNotFoundError:
-        logging.error(
-            f"Failed to Run Google Sheets Task - Service Account Credential File Not Found")
-        return None
-
-    searches_to_update = await read_models(pool, DealifySearch, read_dealify_searches_by_status_sproc, [DealifySearchStatus.Dormant.value, 250])
-    print(f"Found {len(searches_to_update)} Searches to Update!")
+    creds = await read_config_key(pool, ConfigKeys.SHEETS_API_CREDENTIALS)
+    if not creds:
+        logging.error(f"Failed to Run Google Sheets Task - No Credentials")
+    svc_acc = gspread.service_account_from_dict(creds.config_value)
+    logging.debug('Loaded Service Account')
+    max_searches_per_task_key = await read_config_key(pool, ConfigKeys.SHEETS_MAX_SEARCH_RESULTS_PER_TASK)
+    max_searches_per_task = max_searches_per_task_key.config_value
+    column_limit_key = await read_config_key(pool, ConfigKeys.SHEETS_SEARCH_RESULTS_PAGE_COLUMN_LIMIT)
+    column_limit = column_limit_key.config_value
+    row_limit_key = await read_config_key(pool, ConfigKeys.SHEETS_SEARCH_RESULTS_PAGE_ROW_LIMIT)
+    row_limit = row_limit_key.config_value
+    default_share_emails_key = await read_config_key(pool, ConfigKeys.SHEETS_SEARCH_RESULTS_DEFAULT_SHARE_EMAILS)
+    default_share_emails = default_share_emails_key.config_value
+    searches_to_update = await read_models(pool, DealifySearch, read_dealify_searches_by_status_sproc, [DealifySearchStatus.Dormant.value, max_searches_per_task])
+    logging.info(f"Found {len(searches_to_update)} Searches to Update!")
     for search in searches_to_update:
 
         if DealifySources.GoogleSheets.value in search.sources:
@@ -69,7 +74,7 @@ async def run_task_update_dealify_search_results_sheets(pool):
                 logging.error(
                     f"Received WorksheetNotFound Error, Attempting to Create - Sheet Name: {sheet_name} - Search ID: {search.search_id}")
                 sheet.add_worksheet(
-                    sheet_name, cols=SEARCH_RESULTS_PAGE_DEFAULT_COLUMN_LENGTH, rows=SEARCH_RESULTS_PAGE_DEFAULT_ROW_LENGTH)
+                    sheet_name, cols=column_limit, rows=row_limit)
                 worksheet = sheet.worksheet(sheet_name)
             if not worksheet:
                 logging.error(
@@ -78,12 +83,12 @@ async def run_task_update_dealify_search_results_sheets(pool):
 
             try:
                 worksheet.delete_rows(
-                    2, SEARCH_RESULTS_PAGE_DEFAULT_ROW_LENGTH)
+                    2, row_limit)
             except gspread.exceptions.APIError as gspe:
                 logging.error(
                     f"Received InvalidArgument Error - Spreadsheet has No Rows to Delete")
                 logging.error(f"Unknown APIError - Data: {gspe.args}")
-            items_to_add = await read_models(pool, CraigslistItem, read_craigslist_items_by_search_id_sproc, [search.search_id, SEARCH_RESULTS_PAGE_DEFAULT_ROW_LENGTH])
+            items_to_add = await read_models(pool, CraigslistItem, read_craigslist_items_by_search_id_sproc, [search.search_id, row_limit])
             headers = list(CraigslistItem().dict().keys())
             item_data = []
             item_data.append(headers)
